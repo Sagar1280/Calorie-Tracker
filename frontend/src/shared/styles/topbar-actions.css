@@ -1,0 +1,48 @@
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.user-chip {
+  max-width: 110px;
+  overflow: hidden;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #5e655e;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signout-button {
+  padding: 6px 2px;
+  border: 0;
+  background: transparent;
+  color: #6b716b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.signout-button:hover {
+  color: var(--text);
+}
+
+.signout-button:disabled {
+  opacity: 0.5;
+}
+
+.banner.info {
+  border-color: #cfe3d7;
+  background: #eef6f1;
+  color: #2f6247;
+}
+
+.banner.info .banner-icon {
+  background: var(--green);
+}
+

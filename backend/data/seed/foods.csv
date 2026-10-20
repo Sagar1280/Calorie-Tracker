@@ -1,0 +1,521 @@
+slug,name,category,subcategory,brand,base_unit,aliases,tags
+rice-white,White rice,grain,rice,,,white rice|chawal|plain rice,
+rice-brown,Brown rice,grain,rice,,,brown rice,iron|magnesium
+basmati-rice,Basmati rice,grain,rice,,,basmati,
+roti-wheat,Wheat roti,grain,roti,,,roti|chapati|phulka,
+paratha-plain,Plain paratha,grain,paratha,,,paratha,
+paratha-aloo,Aloo paratha,grain,paratha,,,aloo paratha|potato paratha,
+puri,Puri,grain,puri,,,poori,
+naan,Naan,grain,bread,,,naan bread,
+bhatura,Bhatura,grain,bread,,,batura,
+poha,Poha,breakfast,poha,,,flattened rice|aval|poha,
+upma,Upma,breakfast,upma,,,rava upma|uppuma,
+idli,Idli,breakfast,idli,,,idly,
+dosa-plain,Plain dosa,breakfast,dosa,,,dosa|plain dosa,
+masala-dosa,Masala dosa,breakfast,dosa,,,masala dosai,
+uttapam,Uttapam,breakfast,dosa,,,uttapa,
+appam,Appam,breakfast,appam,,,palappam,
+puttu,Puttu,breakfast,puttu,,,puttu,
+dalia,Dalia,breakfast,porridge,,,broken wheat|daliya,
+oats-cooked,Cooked oats,breakfast,porridge,,,oatmeal|oats,
+khichdi,Khichdi,grain,rice,,,khichdi|khichri,
+pulao-veg,Vegetable pulao,grain,rice,,,veg pulao,
+biryani-chicken,Chicken biryani,grain,rice,,,chicken biriyani,
+biryani-veg,Vegetable biryani,grain,rice,,,veg biryani,
+curd-rice,Curd rice,grain,rice,,,dahi rice|thayir sadam,
+lemon-rice,Lemon rice,grain,rice,,,chitranna,
+tamarind-rice,Tamarind rice,grain,rice,,,puliyogare,
+ragi-mudde,Ragi mudde,grain,millet,,,ragi ball|finger millet ball,calcium|iron
+ragi-flour,Ragi flour,grain,millet,,,finger millet flour,calcium|iron
+semolina,Semolina,grain,flour,,,rava|sooji,
+besan,Besan,grain,flour,,,gram flour|chickpea flour,
+rice-flour,Rice flour,grain,flour,,,chawal flour,
+sabudana,Sabudana,grain,starch,,,sago|tapioca pearls,
+sabudana-khichdi,Sabudana khichdi,breakfast,starch,,,sago khichdi,
+bread-white,White bread,packaged,bread,,,bread,
+bread-brown,Brown bread,packaged,bread,,,whole wheat bread,
+pasta-cooked,Cooked pasta,grain,pasta,,,pasta,
+noodles-cooked,Cooked noodles,grain,noodles,,,noodles,
+suji-halwa,Suji halwa,sweet,halwa,,,rava halwa|sooji halwa,
+poha-raw,Poha raw,breakfast,poha,,,flattened rice raw|aval,
+toor-dal,Toor dal,dal,lentil,,,arhar dal|tuvar dal|pigeon pea,iron|folate|magnesium
+moong-dal,Moong dal,dal,lentil,,,green gram dal|mung dal,iron|folate|magnesium
+chana-dal,Chana dal,dal,lentil,,,split chickpea|bengal gram dal,iron|folate
+masoor-dal,Masoor dal,dal,lentil,,,red lentil|pink lentil,iron|folate
+urad-dal,Urad dal,dal,lentil,,,black gram dal|ulundu,iron|folate
+rajma,Rajma,dal,legume,,,kidney beans,iron|folate|magnesium
+chole,Chole,dal,legume,,,chickpeas|kabuli chana|chana,iron|folate
+lobia,Lobia,dal,legume,,,black eyed peas|black eyed beans,iron|folate
+sprouts-moong,Moong sprouts,dal,sprouts,,,sprouts|moong sprouts,iron|folate|vitamin_c
+sambar,Sambar,dal,curry,,,sambhar|saaru,iron|folate
+rasam,Rasam,dal,soup,,,saaru|rasam,
+dal-makhani,Dal makhani,dal,curry,,,makhani dal,
+dal-tadka,Dal tadka,dal,curry,,,tadka dal|dal fry,iron|folate
+kadhi,Kadhi,dal,curry,,,kadhi pakora,calcium
+chana-masala,Chana masala,dal,curry,,,chole masala|chana curry,iron|folate
+aloo-gobi,Aloo gobi,vegetable,curry,,,potato cauliflower,
+bhindi-masala,Bhindi masala,vegetable,curry,,,okra masala|lady finger,
+palak-paneer,Palak paneer,vegetable,curry,,,spinach paneer,iron|folate|calcium|vitamin_a
+mix-veg,Mixed vegetable,vegetable,curry,,,mix veg|mixed veg,
+baingan-bharta,Baingan bharta,vegetable,curry,,,eggplant bharta|brinjal bharta,
+lauki-sabzi,Lauki sabzi,vegetable,curry,,,bottle gourd sabzi|dudhi,
+karela-sabzi,Karela sabzi,vegetable,curry,,,bitter gourd sabzi,
+cabbage-sabzi,Cabbage sabzi,vegetable,curry,,,patta gobi,
+beans-sabzi,Beans sabzi,vegetable,curry,,,green beans,
+carrot-peas-sabzi,Carrot peas sabzi,vegetable,curry,,,gajar matar,vitamin_a
+tomato-curry,Tomato curry,vegetable,curry,,,tomato sabzi,vitamin_c
+onion-salad,Onion salad,vegetable,salad,,,pyaz salad,
+cucumber-salad,Cucumber salad,vegetable,salad,,,kheera salad,
+aloo-sabzi,Aloo sabzi,vegetable,curry,,,potato curry|aloo curry,
+paneer-bhurji,Paneer bhurji,vegetable,curry,,,paneer scramble,calcium|vitamin_b12
+egg-bhurji,Egg bhurji,egg,curry,,,anda bhurji|scrambled eggs,vitamin_b12|vitamin_d|iron
+soya-chunk-curry,Soya chunk curry,vegetable,curry,,,soya curry|meal maker,
+milk-toned,Toned milk,dairy,milk,,ml,,calcium|vitamin_b12
+milk-full-fat,Full fat milk,dairy,milk,,ml,,calcium|vitamin_b12
+curd,Curd,dairy,curd,,,dahi|yogurt,calcium|vitamin_b12
+paneer,Paneer,dairy,cheese,,,cottage cheese|panir,calcium|vitamin_b12
+ghee,Ghee,dairy,fat,,,clarified butter,
+butter,Butter,dairy,fat,,,makhan,
+lassi-sweet,Sweet lassi,dairy,beverage,,ml,,calcium
+chaas,Buttermilk,dairy,beverage,,ml,buttermilk|mor|chaach,calcium|vitamin_b12
+cheese-slice,Cheese slice,dairy,cheese,,,cheese,calcium|vitamin_b12
+khoya,Khoya,dairy,cheese,,,mawa|khoa,calcium
+chicken-curry,Chicken curry,meat,curry,,,murgh curry|chicken masala,iron|zinc|vitamin_b12
+chicken-tandoori,Tandoori chicken,meat,grilled,,,tandoori murgh,iron|zinc|vitamin_b12
+egg-boiled,Boiled egg,egg,boiled,,,hard boiled egg|anda,vitamin_b12|vitamin_d|iron
+egg-omelette,Egg omelette,egg,fried,,,omelet|anda omelette,vitamin_b12|vitamin_d|iron
+fish-curry,Fish curry,fish,curry,,,machli curry,omega_3|vitamin_d|vitamin_b12
+fish-fried,Fried fish,fish,fried,,,machli fry,omega_3|vitamin_d|vitamin_b12
+mutton-curry,Mutton curry,meat,curry,,,goat curry|mutton masala,iron|zinc|vitamin_b12
+prawn-curry,Prawn curry,fish,curry,,,shrimp curry|jhinga,omega_3|vitamin_b12
+chicken-kebab,Chicken kebab,meat,grilled,,,murgh kebab|chicken tikka,iron|zinc|vitamin_b12
+apple,Apple,fruit,fruit,,,seb,
+banana,Banana,fruit,fruit,,,kela,potassium
+mango,Mango,fruit,fruit,,,aam,vitamin_a|vitamin_c
+orange,Orange,fruit,fruit,,,santra,vitamin_c
+guava,Guava,fruit,fruit,,,amrood|peru,vitamin_c|potassium
+papaya,Papaya,fruit,fruit,,,papita,vitamin_a|vitamin_c
+grapes,Grapes,fruit,fruit,,,angoor,
+watermelon,Watermelon,fruit,fruit,,,tarbooz,
+pomegranate,Pomegranate,fruit,fruit,,,anar,
+pineapple,Pineapple,fruit,fruit,,,ananas,vitamin_c
+chikoo,Chikoo,fruit,fruit,,,sapota,
+coconut-water,Coconut water,beverage,juice,,ml,nariyal pani,potassium
+almonds,Almonds,nuts,nut,,,badam,magnesium|vitamin_e
+cashews,Cashews,nuts,nut,,,kaju,magnesium|zinc
+peanuts,Peanuts,nuts,nut,,,moongphali,
+walnuts,Walnuts,nuts,nut,,,akhrot,omega_3|magnesium
+flaxseed,Flaxseed,nuts,seed,,,linseed|alsi,omega_3|magnesium
+chia-seeds,Chia seeds,nuts,seed,,,chia,omega_3|calcium|magnesium
+pumpkin-seeds,Pumpkin seeds,nuts,seed,,,pepitas,zinc|magnesium|iron
+sesame,Sesame seeds,nuts,seed,,,til|gingelly,calcium|iron|zinc
+gulab-jamun,Gulab jamun,sweet,sweet,,,gulab jamoon,
+rasgulla,Rasgulla,sweet,sweet,,,rosogolla,
+jalebi,Jalebi,sweet,sweet,,,jilebi,
+carrot-halwa,Carrot halwa,sweet,sweet,,,gajar ka halwa|gajar halwa,vitamin_a
+kheer,Kheer,sweet,sweet,,,rice kheer|payasam,calcium
+besan-laddu,Besan laddu,sweet,sweet,,,besan laddoo,
+mysore-pak,Mysore pak,sweet,sweet,,,mysore pa,
+barfi,Barfi,sweet,sweet,,,burfi,
+rasmalai,Rasmalai,sweet,sweet,,,ras malai,calcium
+samosa,Samosa,snack,snack,,,samosa,
+pakora,Pakora,snack,snack,,,pakoda|bhajji,
+vada,Vada,snack,snack,,,vadai|medu vada,
+dhokla,Dhokla,snack,snack,,,khaman dhokla,
+kachori,Kachori,snack,snack,,,katchori,
+bhel-puri,Bhel puri,snack,snack,,,bhel,
+pani-puri,Pani puri,snack,snack,,,golgappa|puchka,
+aloo-tikki,Aloo tikki,snack,snack,,,potato tikki,
+pav-bhaji,Pav bhaji,snack,snack,,,bhaji pav,
+chole-bhature,Chole bhature,snack,snack,,,chana bhatura,
+momos-veg,Veg momos,snack,snack,,,momo|dumplings,
+veg-chowmein,Veg chowmein,snack,noodles,,,chow mein|hakka noodles,
+veg-manchurian,Veg manchurian,snack,snack,,,gobi manchurian,
+masala-peanuts,Masala peanuts,snack,snack,,,peanut chaat,
+khakhra,Khakhra,snack,snack,,,khakhra,
+thepla,Thepla,snack,flatbread,,,methi thepla,
+muthiya,Muthiya,snack,snack,,,muthia,
+tea-milk,Milk tea,beverage,tea,,ml,chai|masala chai,
+coffee-milk,Coffee,beverage,coffee,,ml,filter coffee|kaapi,
+lemonade,Lemonade,beverage,juice,,ml,nimbu pani|shikanji,vitamin_c
+cola,Cola,beverage,soft drink,,ml,soft drink|soda|cold drink,
+orange-juice,Orange juice,beverage,juice,,ml,orange juice,vitamin_c
+green-tea,Green tea,beverage,tea,,ml,green tea,
+mustard-oil,Mustard oil,oil,oil,,,sarson ka tel,
+sunflower-oil,Sunflower oil,oil,oil,,,refined sunflower oil,
+coconut-oil,Coconut oil,oil,oil,,,nariyal tel,
+sugar,Sugar,condiment,sweetener,,,cheeni,
+jaggery,Jaggery,condiment,sweetener,,,gur|gud,iron
+honey,Honey,condiment,sweetener,,,shahad,
+ketchup,Tomato ketchup,condiment,sauce,,,ketchup,
+mayonnaise,Mayonnaise,condiment,sauce,,,mayo,
+jam-mixed-fruit,Mixed fruit jam,condiment,spread,,,jam,
+turmeric-powder,Turmeric powder,condiment,spice,,,haldi,iron
+red-chilli-powder,Red chilli powder,condiment,spice,,,lal mirch,
+coriander-powder,Coriander powder,condiment,spice,,,dhania powder,
+cumin-seeds,Cumin seeds,condiment,spice,,,jeera,iron
+garam-masala,Garam masala,condiment,spice,,,garam masala,
+britannia-good-day-cashew,Good Day Cashew,packaged,biscuit,Britannia,,good day cashew,
+britannia-marie-gold,Marie Gold,packaged,biscuit,Britannia,,marie gold,
+britannia-nutri-choice-digestive,Nutri Choice Digestive,packaged,biscuit,Britannia,,digestive biscuit,
+britannia-bourbon,Bourbon,packaged,biscuit,Britannia,,bourbon biscuit,
+britannia-little-hearts,Little Hearts,packaged,biscuit,Britannia,,little hearts,
+britannia-good-day-butter,Good Day Butter,packaged,biscuit,Britannia,,good day butter,
+britannia-milk-bikis,Milk Bikis,packaged,biscuit,Britannia,,milk bikis,calcium
+parle-g,Parle-G,packaged,biscuit,Parle,,parle g|glucose biscuit,
+parle-monaco,Monaco,packaged,biscuit,Parle,,monaco biscuit,
+parle-krackjack,Krackjack,packaged,biscuit,Parle,,krack jack,
+parle-hide-and-seek,Hide and Seek,packaged,biscuit,Parle,,hide & seek,
+parle-20-20,Parle 20-20,packaged,biscuit,Parle,,20 20 biscuit,
+sunfeast-dark-fantasy,Dark Fantasy,packaged,biscuit,ITC,,dark fantasy,
+sunfeast-yippee-masala,Yippee Masala Noodles,packaged,noodles,ITC,,yippee noodles,
+maggi-masala-noodles,Maggi Masala Noodles,packaged,noodles,Nestle,,maggi noodles,
+top-ramen-curry,Top Ramen Curry,packaged,noodles,Nestle,,top ramen,
+lays-magic-masala,Lay's Magic Masala,packaged,chips,PepsiCo,,lays|potato chips,
+kurkure-masala-munch,Kurkure Masala Munch,packaged,snack,PepsiCo,,kurkure,
+bingo-mad-angles,Bingo Mad Angles,packaged,snack,ITC,,mad angles,
+haldirams-aloo-bhujia,Haldiram's Aloo Bhujia,packaged,snack,Haldiram's,,aloo bhujia,
+haldirams-soan-papdi,Haldiram's Soan Papdi,packaged,sweet,Haldiram's,,soan papdi,
+haldirams-moong-dal,Haldiram's Moong Dal,packaged,snack,Haldiram's,,moong dal namkeen,
+haldirams-pani-puri,Haldiram's Pani Puri,packaged,snack,Haldiram's,,pani puri kit,
+cadbury-dairy-milk,Cadbury Dairy Milk,packaged,chocolate,Cadbury,,dairy milk,
+cadbury-5-star,Cadbury 5 Star,packaged,chocolate,Cadbury,,5 star,
+cadbury-perk,Cadbury Perk,packaged,chocolate,Cadbury,,perk,
+nestle-kitkat,Nestle KitKat,packaged,chocolate,Nestle,,kit kat,
+nestle-munch,Nestle Munch,packaged,chocolate,Nestle,,munch,
+ferrero-rocher,Ferrero Rocher,packaged,chocolate,Ferrero,,rocher,
+amul-dark-chocolate,Amul Dark Chocolate,packaged,chocolate,Amul,,amul dark,
+amul-cheese-slice,Amul Cheese Slice,packaged,cheese,Amul,,amul cheese,
+amul-gold-milk,Amul Gold Milk,packaged,milk,Amul,ml,amul gold,calcium|vitamin_b12
+nestle-a-plus-milk,Nestle A+ Milk,packaged,milk,Nestle,ml,a plus milk,calcium|vitamin_b12
+mother-dairy-curd,Mother Dairy Curd,packaged,curd,Mother Dairy,,mother dairy dahi,calcium|vitamin_b12
+epigamia-greek-yogurt,Epigamia Greek Yogurt,packaged,yogurt,Epigamia,,greek yogurt,calcium
+tropicana-orange-juice,Tropicana Orange Juice,packaged,juice,Tropicana,ml,tropicana,vitamin_c
+aashirvaad-atta,Aashirvaad Atta,packaged,flour,Aashirvaad,,whole wheat atta,
+india-gate-basmati-rice,India Gate Basmati Rice,packaged,rice,India Gate,,basmati rice,
+fortune-sunflower-oil,Fortune Sunflower Oil,packaged,oil,Fortune,,sunflower oil,
+saffola-oats,Saffola Oats,packaged,oats,Saffola,,oats,
+tata-salt,Tata Salt,packaged,salt,Tata,,salt|iodized salt,
+maggi-hot-and-sweet-ketchup,Maggi Hot and Sweet Ketchup,packaged,sauce,Nestle,,hot and sweet sauce,
+amul-malai-ice-cream,Amul Malai Ice Cream,packaged,ice cream,Amul,,malai ice cream,calcium
+britannia-nutri-choice-cookies,Nutri Choice Cookies,packaged,biscuit,Britannia,,nutri choice,
+bajra-roti,Bajra roti,bread,roti,,,bajra roti|millet roti,iron|magnesium
+jowar-roti,Jowar roti,bread,roti,,,jowar bhakri|sorghum roti,iron|magnesium
+makki-roti,Makki roti,bread,roti,,,makki di roti|maize roti,
+missi-roti,Missi roti,bread,roti,,,missi roti,
+tandoori-roti,Tandoori roti,bread,roti,,,tandoori roti,
+rumali-roti,Rumali roti,bread,roti,,,rumali roti,
+lachha-paratha,Lachha paratha,bread,paratha,,,lachha paratha|layered paratha,
+paneer-paratha,Paneer paratha,bread,paratha,,,paneer paratha,calcium
+gobi-paratha,Gobi paratha,bread,paratha,,,cauliflower paratha,
+mooli-paratha,Mooli paratha,bread,paratha,,,radish paratha,
+methi-paratha,Methi paratha,bread,paratha,,,fenugreek paratha,iron
+onion-paratha,Onion paratha,bread,paratha,,,pyaz paratha,
+besan-chilla,Besan chilla,bread,pancake,,,gram flour chilla|besan cheela,
+moong-chilla,Moong chilla,bread,pancake,,,moong dal chilla,
+rava-dosa,Rava dosa,breakfast,dosa,,,semolina dosa,
+neer-dosa,Neer dosa,breakfast,dosa,,,neer dose,
+set-dosa,Set dosa,breakfast,dosa,,,set dose,
+ragi-dosa,Ragi dosa,breakfast,dosa,,,finger millet dosa,calcium|iron
+pesarattu,Pesarattu,breakfast,dosa,,,moong dal dosa,
+adai,Adai,breakfast,dosa,,,lentil dosa,
+ven-pongal,Ven pongal,breakfast,rice,,,khara pongal,
+tomato-upma,Tomato upma,breakfast,upma,,,tomato uppuma,
+vermicelli-upma,Vermicelli upma,breakfast,upma,,,sewai upma,
+rava-idli,Rava idli,breakfast,idli,,,semolina idli,
+appe,Appe,breakfast,idli,,,paniyaram|appe,
+onion-uttapam,Onion uttapam,breakfast,dosa,,,onion uttapa,
+egg-dosa,Egg dosa,breakfast,dosa,,,mutta dosa,
+aloo-poha,Aloo poha,breakfast,poha,,,batata poha,
+kanda-poha,Kanda poha,breakfast,poha,,,onion poha,
+sabudana-vada,Sabudana vada,breakfast,snack,,,sago vada,
+jeera-rice,Jeera rice,rice,rice,,,cumin rice,
+ghee-rice,Ghee rice,rice,rice,,,neyy choru,
+veg-fried-rice,Veg fried rice,rice,rice,,,vegetable fried rice,
+schezwan-fried-rice,Schezwan fried rice,rice,rice,,,schezwan rice,
+egg-fried-rice,Egg fried rice,rice,rice,,,,
+chicken-fried-rice,Chicken fried rice,rice,rice,,,,
+mutton-biryani,Mutton biryani,rice,rice,,,mutton biriyani,iron|zinc
+peas-pulao,Peas pulao,rice,rice,,,matar pulao,
+jeera-pulao,Jeera pulao,rice,rice,,,cumin pulao,
+tomato-rice,Tomato rice,rice,rice,,,tomato bath,
+coconut-rice,Coconut rice,rice,rice,,,thengai sadam,
+bisibelebath,Bisibelebath,rice,rice,,,bisi bele bath,
+vangi-bath,Vangi bath,rice,rice,,,brinjal rice,
+tomato-bath,Tomato bath,rice,rice,,,tomato rice,
+mor-kuzhambu,Mor kuzhambu,rice,curry,,,buttermilk curry,calcium
+avial,Avial,vegetable,curry,,,aviyal,
+thoran,Thoran,vegetable,curry,,,vegetable thoran,
+olan,Olan,vegetable,curry,,,,
+dal-dhokli,Dal dhokli,main,curry,,,dal dhokli,
+dal-baati,Dal baati,main,curry,,,dal baati,
+misal-pav,Misal pav,main,curry,,,misal pao,
+usal,Usal,main,curry,,,usal,
+misal,Misal,main,curry,,,misal,
+goan-fish-curry,Goan fish curry,fish,curry,,,goan machli curry,omega_3
+chicken-chettinad,Chicken chettinad,meat,curry,,,chettinad chicken,iron|zinc
+chicken-korma,Chicken korma,meat,curry,,,murgh korma,iron|zinc
+butter-chicken,Butter chicken,meat,curry,,,murgh makhani,iron|zinc
+chicken-tikka-masala,Chicken tikka masala,meat,curry,,,chicken tikka masala,iron|zinc
+paneer-butter-masala,Paneer butter masala,vegetable,curry,,,paneer makhani,calcium
+paneer-tikka-masala,Paneer tikka masala,vegetable,curry,,,paneer tikka,calcium
+kadai-paneer,Kadai paneer,vegetable,curry,,,karahi paneer,calcium
+palak-chicken,Palak chicken,meat,curry,,,spinach chicken,iron|folate
+egg-curry,Egg curry,egg,curry,,,anda curry,vitamin_b12|vitamin_d
+fish-moilee,Fish moilee,fish,curry,,,fish molee,omega_3
+prawn-masala,Prawn masala,fish,curry,,,jhinga masala,omega_3
+dal-palak,Dal palak,dal,curry,,,spinach dal,iron|folate
+dal-methi,Dal methi,dal,curry,,,fenugreek dal,iron|folate
+dal-panchmel,Dal panchmel,dal,curry,,,panchmel dal,iron|folate
+chana-chaat,Chana chaat,dal,snack,,,chickpea chaat,iron|folate
+ragda,Ragda,dal,curry,,,ragda curry,
+rajma-masala,Rajma masala,dal,curry,,,rajma curry,iron|folate
+lobia-curry,Lobia curry,dal,curry,,,black eyed peas curry,iron|folate
+khaman,Khaman,snack,snack,,,khaman dhokla,
+cowpea,Cowpea,dal,legume,,,chawli|lobia,
+horse-gram,Horse gram,dal,legume,,,kulthi|hurali,iron
+moth-beans,Moth beans,dal,legume,,,matki,
+green-peas,Green peas,dal,vegetable,,,matar,
+sweet-corn,Sweet corn,dal,vegetable,,,bhutta|makai,
+soya-chunks-raw,Soya chunks raw,dal,soya,,,soya nuggets|meal maker,
+tofu,Tofu,dal,soya,,,soy paneer,calcium
+sprouted-moth,Sprouted moth beans,dal,sprouts,,,matki sprouts,iron|folate
+sprouted-chana,Sprouted chana,dal,sprouts,,,chana sprouts,iron|folate
+kala-chana-masala,Kala chana masala,dal,curry,,,black chickpea curry,iron|folate
+chana-saag,Chana saag,dal,curry,,,chickpea spinach,iron|folate
+dal-fry,Dal fry,dal,curry,,,fried dal,iron|folate
+moong-dal-curry,Moong dal curry,dal,curry,,,moong curry,iron|folate
+masoor-dal-curry,Masoor dal curry,dal,curry,,,red lentil curry,iron|folate
+urad-dal-curry,Urad dal curry,dal,curry,,,black gram curry,iron|folate
+gujarati-dal,Gujarati dal,dal,curry,,,sweet dal,iron|folate
+tomato-dal,Tomato dal,dal,curry,,,tomato dal,iron|folate
+bhindi-fry,Bhindi fry,vegetable,curry,,,okra fry,
+aloo-matar,Aloo matar,vegetable,curry,,,potato peas,
+aloo-palak,Aloo palak,vegetable,curry,,,potato spinach,iron|folate
+aloo-baingan,Aloo baingan,vegetable,curry,,,potato brinjal,
+aloo-bhindi,Aloo bhindi,vegetable,curry,,,potato okra,
+aloo-karela,Aloo karela,vegetable,curry,,,potato bitter gourd,
+gobi-matar,Gobi matar,vegetable,curry,,,cauliflower peas,
+sarson-ka-saag,Sarson ka saag,vegetable,curry,,,mustard greens,iron|folate|calcium
+bathua-saag,Bathua saag,vegetable,curry,,,pigweed greens,iron|folate
+methi-saag,Methi saag,vegetable,curry,,,fenugreek greens,iron|folate
+palak-saag,Palak saag,vegetable,curry,,,spinach greens,iron|folate|vitamin_a
+undhiyu,Undhiyu,vegetable,curry,,,undhiyu,
+kathal-sabzi,Kathal sabzi,vegetable,curry,,,jackfruit curry,
+mushroom-masala,Mushroom masala,vegetable,curry,,,mushroom curry,
+matar-mushroom,Matar mushroom,vegetable,curry,,,peas mushroom,
+paneer-masala,Paneer masala,vegetable,curry,,,paneer curry,calcium
+shahi-paneer,Shahi paneer,vegetable,curry,,,shahi paneer,calcium
+paneer-lababdar,Paneer lababdar,vegetable,curry,,,paneer lababdar,calcium
+malai-kofta,Malai kofta,vegetable,curry,,,malai kofta,calcium
+veg-kofta,Veg kofta,vegetable,curry,,,vegetable kofta,
+lauki-kofta,Lauki kofta,vegetable,curry,,,bottle gourd kofta,
+stuffed-baingan,Stuffed baingan,vegetable,curry,,,bharwa baingan,
+bharwa-bhindi,Bharwa bhindi,vegetable,curry,,,stuffed okra,
+bharwa-karela,Bharwa karela,vegetable,curry,,,stuffed bitter gourd,
+dum-aloo,Dum aloo,vegetable,curry,,,dum aloo,
+kashmiri-dum-aloo,Kashmiri dum aloo,vegetable,curry,,,kashmiri aloo,
+navratan-korma,Navratan korma,vegetable,curry,,,navratan kurma,
+veg-korma,Veg korma,vegetable,curry,,,vegetable kurma,
+veg-kolhapuri,Veg kolhapuri,vegetable,curry,,,kolhapuri veg,
+veg-makhani,Veg makhani,vegetable,curry,,,vegetable makhani,
+veg-handi,Veg handi,vegetable,curry,,,vegetable handi,
+veg-kadai,Veg kadai,vegetable,curry,,,kadai vegetables,
+veg-jalfrezi,Veg jalfrezi,vegetable,curry,,,vegetable jalfrezi,
+cauliflower-fry,Cauliflower fry,vegetable,curry,,,gobi fry,
+gobi-65,Gobi 65,vegetable,fried,,,cauliflower 65,
+paneer-65,Paneer 65,vegetable,fried,,,paneer fry,calcium
+mushroom-65,Mushroom 65,vegetable,fried,,,mushroom fry,
+baby-corn-masala,Baby corn masala,vegetable,curry,,,baby corn curry,
+soya-chaap-masala,Soya chaap masala,vegetable,curry,,,soya chaap,
+soya-granules-curry,Soya granules curry,vegetable,curry,,,soya keema,
+mushroom-biryani,Mushroom biryani,rice,rice,,,mushroom biriyani,
+paneer-biryani,Paneer biryani,rice,rice,,,paneer biriyani,calcium
+corn-palak,Corn palak,vegetable,curry,,,spinach corn,
+bhindi-do-pyaza,Bhindi do pyaza,vegetable,curry,,,okra do pyaza,
+karela-do-pyaza,Karela do pyaza,vegetable,curry,,,bitter gourd do pyaza,
+chicken-do-pyaza,Chicken do pyaza,meat,curry,,,chicken do pyaza,iron|zinc
+chicken-tikka,Chicken tikka,meat,grilled,,,chicken tikka,iron|zinc
+chicken-malai-tikka,Chicken malai tikka,meat,grilled,,,malai tikka,iron|zinc
+chicken-reshami-kebab,Chicken reshami kebab,meat,grilled,,,reshami kebab,iron|zinc
+chicken-seekh-kebab,Chicken seekh kebab,meat,grilled,,,seekh kebab,iron|zinc
+chicken-lollipop,Chicken lollipop,meat,fried,,,chicken lollipop,iron|zinc
+chicken-manchurian,Chicken manchurian,meat,fried,,,chicken manchurian,iron|zinc
+chilli-chicken,Chilli chicken,meat,fried,,,chilli chicken,iron|zinc
+chicken-liver-fry,Chicken liver fry,meat,fried,,,liver fry,iron|vitamin_b12
+egg-masala,Egg masala,egg,curry,,,egg masala,vitamin_b12|vitamin_d
+egg-white-boiled,Egg white boiled,egg,boiled,,,egg white,vitamin_b12
+egg-yolk-boiled,Egg yolk boiled,egg,boiled,,,egg yolk,vitamin_b12|vitamin_d
+fish-tikka,Fish tikka,fish,grilled,,,fish tikka,omega_3|vitamin_d
+fish-finger,Fish finger,fish,fried,,,fish fingers,omega_3
+prawn-fry,Prawn fry,fish,fried,,,jhinga fry,omega_3
+prawn-tikka,Prawn tikka,fish,grilled,,,prawn tikka,omega_3
+crab-curry,Crab curry,fish,curry,,,crab masala,omega_3
+squid-fry,Squid fry,fish,fried,,,calamari fry,omega_3
+mutton-kebab,Mutton kebab,meat,grilled,,,mutton kebab,iron|zinc
+mutton-seekh-kebab,Mutton seekh kebab,meat,grilled,,,seekh kebab,iron|zinc
+mutton-chops,Mutton chops,meat,grilled,,,mutton chops,iron|zinc
+mutton-keema,Mutton keema,meat,curry,,,keema,iron|zinc
+chicken-soup,Chicken soup,meat,soup,,,chicken broth,
+mutton-soup,Mutton soup,meat,soup,,,mutton broth,
+egg-drop-soup,Egg drop soup,egg,soup,,,egg soup,
+chicken-salad,Chicken salad,meat,salad,,,chicken salad,
+tuna-salad,Tuna salad,fish,salad,,,tuna salad,omega_3
+boiled-chicken-breast,Boiled chicken breast,meat,boiled,,,chicken breast,
+grilled-chicken-breast,Grilled chicken breast,meat,grilled,,,grilled chicken,
+chicken-thigh,Chicken thigh,meat,roast,,,chicken thigh,
+pear,Pear,fruit,fruit,,,nashpati,
+peach,Peach,fruit,fruit,,,aadu,
+plum,Plum,fruit,fruit,,,aloo bukhara,
+apricot,Apricot,fruit,fruit,,,khubani,
+kiwi,Kiwi,fruit,fruit,,,kiwi fruit,vitamin_c
+strawberry,Strawberry,fruit,fruit,,,strawberry,vitamin_c
+blueberry,Blueberry,fruit,fruit,,,blueberries,
+blackberry,Blackberry,fruit,fruit,,,blackberries,
+cherry,Cherry,fruit,fruit,,,cherries,
+custard-apple,Custard apple,fruit,fruit,,,sitaphal,
+jamun,Jamun,fruit,fruit,,,java plum|black plum,
+ber,Ber,fruit,fruit,,,Indian jujube,
+amla,Amla,fruit,fruit,,,Indian gooseberry,vitamin_c
+muskmelon,Muskmelon,fruit,fruit,,,kharbuja,
+honeydew-melon,Honeydew melon,fruit,fruit,,,honeydew,
+dragon-fruit,Dragon fruit,fruit,fruit,,,pitaya,
+avocado,Avocado,fruit,fruit,,,,
+passion-fruit,Passion fruit,fruit,fruit,,,,
+fig,Fig,fruit,fruit,,,anjeer,
+date,Date,fruit,dried,,,khajur,
+pistachios,Pistachios,nuts,nut,,,pista,magnesium
+hazelnuts,Hazelnuts,nuts,nut,,,filberts,
+pecans,Pecans,nuts,nut,,,,
+brazil-nuts,Brazil nuts,nuts,nut,,,,
+pine-nuts,Pine nuts,nuts,nut,,,chilgoza,
+sunflower-seeds,Sunflower seeds,nuts,seed,,,,
+watermelon-seeds,Watermelon seeds,nuts,seed,,,magaz,
+poppy-seeds,Poppy seeds,nuts,seed,,,khus khus,calcium
+mustard-seeds,Mustard seeds,nuts,seed,,,rai,
+nigella-seeds,Nigella seeds,nuts,seed,,,kalonji,
+kaju-katli,Kaju katli,sweet,sweet,,,kaju barfi,
+pista-barfi,Pista barfi,sweet,sweet,,,pista burfi,
+chocolate-barfi,Chocolate barfi,sweet,sweet,,,chocolate burfi,
+coconut-barfi,Coconut barfi,sweet,sweet,,,nariyal barfi,
+besan-barfi,Besan barfi,sweet,sweet,,,besan burfi,
+moong-dal-halwa,Moong dal halwa,sweet,sweet,,,moong halwa,
+atte-ka-halwa,Atte ka halwa,sweet,sweet,,,wheat halwa,
+doodhi-halwa,Doodhi halwa,sweet,sweet,,,lauki halwa,
+pumpkin-halwa,Pumpkin halwa,sweet,sweet,,,kaddu halwa,
+sewaiyan,Sewaiyan,sweet,sweet,,,vermicelli kheer|sevai,
+phirni,Phirni,sweet,sweet,,,firni,
+shrikhand,Shrikhand,sweet,sweet,,,shrikhand,calcium
+mishti-doi,Mishti doi,sweet,sweet,,,sweet curd,calcium
+sandesh,Sandesh,sweet,sweet,,,sondesh,calcium
+chum-chum,Chum chum,sweet,sweet,,,chomchom,calcium
+malpua,Malpua,sweet,sweet,,,malpua,
+imarti,Imarti,sweet,sweet,,,amriti,
+balushahi,Balushahi,sweet,sweet,,,balushai,
+ghevar,Ghevar,sweet,sweet,,,ghevar,
+peda,Peda,sweet,sweet,,,pedha,calcium
+milk-cake,Milk cake,sweet,sweet,,,milk cake,calcium
+soan-papdi,Soan papdi,sweet,sweet,,,soan papdi,
+patishapta,Patishapta,sweet,sweet,,,patisapta,
+modak,Modak,sweet,sweet,,,ukadiche modak,
+puran-poli,Puran poli,sweet,sweet,,,puran poli,
+veg-cutlet,Veg cutlet,snack,snack,,,vegetable cutlet,
+aloo-chop,Aloo chop,snack,snack,,,potato chop,
+veg-chop,Veg chop,snack,snack,,,vegetable chop,
+fish-cutlet,Fish cutlet,snack,snack,,,fish chop,omega_3
+chicken-cutlet,Chicken cutlet,snack,snack,,,chicken chop,
+egg-roll,Egg roll,snack,snack,,,egg wrap,
+chicken-roll,Chicken roll,snack,snack,,,chicken wrap,
+paneer-roll,Paneer roll,snack,snack,,,paneer wrap,calcium
+veg-roll,Veg roll,snack,snack,,,vegetable wrap,
+vada-pav,Vada pav,snack,snack,,,vada pao,
+dabeli,Dabeli,snack,snack,,,kutchi dabeli,
+sev-puri,Sev puri,snack,snack,,,sevpuri,
+ragda-pattice,Ragda pattice,snack,snack,,,ragda pattice,
+chole-tikki,Chole tikki,snack,snack,,,chana tikki,
+aloo-chaat,Aloo chaat,snack,snack,,,potato chaat,
+papdi-chaat,Papdi chaat,snack,snack,,,papri chaat,
+dahi-papdi-chaat,Dahi papdi chaat,snack,snack,,,dahi papri,
+dahi-vada,Dahi vada,snack,snack,,,dahi bhalla,
+fruit-chaat,Fruit chaat,snack,snack,,,fruit chaat,
+corn-chaat,Corn chaat,snack,snack,,,masala corn,
+sev,Sev,snack,snack,,,gram flour sev,
+namkeen-mix,Namkeen mix,snack,snack,,,mixture|namkeen,
+bhujia,Bhujia,snack,snack,,,bikaneri bhujia,
+chivda,Chivda,snack,snack,,,poha chivda,
+murukku,Murukku,snack,snack,,,chakli,
+mathri,Mathri,snack,snack,,,mathri,
+papad,Papad,snack,snack,,,papadum,
+roasted-chana,Roasted chana,snack,snack,,,roasted chickpeas,
+roasted-peanuts,Roasted peanuts,snack,snack,,,peanut fry,
+popcorn,Popcorn,snack,snack,,,popcorn,
+caramel-popcorn,Caramel popcorn,snack,snack,,,caramel corn,
+nachos,Nachos,snack,snack,,,tortilla chips,
+potato-wedges,Potato wedges,snack,snack,,,wedges,
+french-fries,French fries,snack,snack,,,fries,
+veg-nuggets,Veg nuggets,snack,snack,,,vegetable nuggets,
+tea-black,Black tea,beverage,tea,,ml,,
+coffee-black,Black coffee,beverage,coffee,,ml,,
+hot-chocolate,Hot chocolate,beverage,drink,,ml,hot cocoa,
+milk-shake-vanilla,Vanilla milkshake,beverage,shake,,ml,vanilla shake,
+mango-shake,Mango shake,beverage,shake,,ml,mango milkshake,
+banana-shake,Banana shake,beverage,shake,,ml,banana milkshake,
+cold-coffee,Cold coffee,beverage,coffee,,ml,iced coffee,
+iced-tea,Iced tea,beverage,tea,,ml,iced tea,
+lemon-soda,Lemon soda,beverage,drink,,ml,nimbu soda,
+jal-jeera,Jal jeera,beverage,drink,,ml,jaljira,
+aam-panna,Aam panna,beverage,drink,,ml,raw mango drink,
+sugarcane-juice,Sugarcane juice,beverage,juice,,ml,ganne ka ras,
+coconut-milk,Coconut milk,beverage,drink,,ml,nariyal doodh,
+almond-milk,Almond milk,beverage,drink,,ml,badam milk,
+soy-milk,Soy milk,beverage,drink,,ml,soya milk,
+lassi-mango,Mango lassi,beverage,drink,,ml,mango lassi,
+falooda,Falooda,beverage,drink,,ml,faluda,
+thandai,Thandai,beverage,drink,,ml,thandai,
+rose-milk,Rose milk,beverage,drink,,ml,gulab doodh,
+iced-lemon-tea,Iced lemon tea,beverage,tea,,ml,lemon iced tea,
+mustard-sauce,Mustard sauce,condiment,sauce,,,mustard sauce,
+tamarind-chutney,Tamarind chutney,condiment,chutney,,,imli chutney,
+mint-chutney,Mint chutney,condiment,chutney,,,pudina chutney,
+coconut-chutney,Coconut chutney,condiment,chutney,,,nariyal chutney,
+tomato-chutney,Tomato chutney,condiment,chutney,,,tomato chutney,
+mango-pickle,Mango pickle,condiment,pickle,,,aam ka achar,
+lemon-pickle,Lemon pickle,condiment,pickle,,,nimbu ka achar,
+soy-sauce,Soy sauce,condiment,sauce,,,soya sauce,
+vinegar,Vinegar,condiment,sauce,,,sirka,
+butter-garlic,Garlic butter,condiment,spread,,,garlic butter,
+amul-butter,Amul Butter,packaged,butter,Amul,,amul makhan,
+amul-ghee,Amul Ghee,packaged,ghee,Amul,,amul ghee,
+amul-paneer,Amul Paneer,packaged,cheese,Amul,,amul paneer,calcium
+amul-curd,Amul Curd,packaged,curd,Amul,,amul dahi,calcium
+amul-lassi,Amul Lassi,packaged,beverage,Amul,ml,amul lassi,calcium
+amul-kool-milk,Amul Kool Milk,packaged,beverage,Amul,ml,amul kool,calcium
+britannia-cheese,Britannia Cheese,packaged,cheese,Britannia,,britannia cheese,calcium
+britannia-yogurt,Britannia Yogurt,packaged,yogurt,Britannia,,britannia dahi,calcium
+britannia-bread,Britannia Bread,packaged,bread,Britannia,,britannia bread,
+britannia-whole-wheat-bread,Britannia Whole Wheat Bread,packaged,bread,Britannia,,whole wheat bread,
+britannia-croissant,Britannia Croissant,packaged,bakery,Britannia,,croissant,
+britannia-veg-roll,Britannia Veg Roll,packaged,snack,Britannia,,veg roll,
+parle-rusk,Parle Rusk,packaged,rusk,Parle,,parle rusk,
+parle-nutri-choice,Parle Nutri Choice,packaged,biscuit,Parle,,nutri choice,
+parle-marie,Parle Marie,packaged,biscuit,Parle,,parle marie,
+parle-gold,Parle Gold,packaged,biscuit,Parle,,parle gold,
+sunfeast-marie,Sunfeast Marie,packaged,biscuit,ITC,,sunfeast marie,
+sunfeast-bourbon,Sunfeast Bourbon,packaged,biscuit,ITC,,sunfeast bourbon,
+sunfeast-farmlite,Sunfeast Farmlite,packaged,biscuit,ITC,,farmlite,
+maggi-cup-noodles,Maggi Cup Noodles,packaged,noodles,Nestle,,cup noodles,
+maggi-pazzta,Maggi Pazzta,packaged,pasta,Nestle,,pazzta,
+maggi-bhuna,Maggi Bhuna,packaged,sauce,Nestle,,bhuna sauce,
+top-ramen-masala,Top Ramen Masala,packaged,noodles,Nestle,,top ramen masala,
+lays-cream-onion,Lay's Cream and Onion,packaged,chips,PepsiCo,,cream and onion,
+lays-tomato,Lay's Tomato,packaged,chips,PepsiCo,,tomato chips,
+kurkure-chilli,Kurkure Chilli,packaged,snack,PepsiCo,,chilli kurkure,
+bingo-tomato,Bingo Tomato,packaged,snack,ITC,,tomato bingo,
+haldirams-bhujia,Haldiram's Bhujia,packaged,snack,Haldiram's,,bhujia,
+haldirams-chivda,Haldiram's Chivda,packaged,snack,Haldiram's,,chivda,
+haldirams-kaju,Haldiram's Kaju,packaged,snack,Haldiram's,,kaju namkeen,
+haldirams-gulab-jamun,Haldiram's Gulab Jamun,packaged,sweet,Haldiram's,,gulab jamun,
+haldirams-rasgulla,Haldiram's Rasgulla,packaged,sweet,Haldiram's,,rasgulla,
+cadbury-celebrations,Cadbury Celebrations,packaged,chocolate,Cadbury,,celebrations,
+cadbury-bournville,Cadbury Bournville,packaged,chocolate,Cadbury,,bournville,
+nestle-milkmaid,Nestle Milkmaid,packaged,dessert,Nestle,,milkmaid,calcium

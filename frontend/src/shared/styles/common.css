@@ -1,0 +1,59 @@
+.card {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(255, 254, 250, 0.88);
+  box-shadow: 0 12px 30px -24px rgba(27, 33, 28, 0.24);
+  backdrop-filter: blur(8px);
+}
+
+.form-card {
+  padding: 20px;
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.section-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.text-button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--tone-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.text-button:disabled {
+  opacity: 0.4;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.form-fields:disabled {
+  opacity: 0.65;
+}
+

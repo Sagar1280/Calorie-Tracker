@@ -1,0 +1,161 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.field-label {
+  margin-bottom: 7px;
+  color: #6f766f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 12px;
+}
+
+.field-row.even {
+  grid-template-columns: 1fr 1fr;
+}
+
+.text-input,
+.input-shell,
+.select-wrap select {
+  width: 100%;
+  height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fbfaf5;
+  color: var(--text);
+  font-size: 15px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.text-input {
+  padding: 0 14px;
+}
+
+.input-shell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 13px;
+}
+
+.input-shell input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.input-shell .unit {
+  color: #8a908a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.text-input::placeholder,
+.input-shell input::placeholder {
+  color: #a9aea8;
+}
+
+.text-input:focus,
+.input-shell:focus-within,
+.select-wrap select:focus {
+  border-color: var(--tone);
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  height: 50px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #efede6;
+}
+
+.segmented button {
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: #6d746d;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.segmented button.segment-active {
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(27, 33, 28, 0.13);
+}
+
+.segmented button:disabled {
+  cursor: default;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap select {
+  padding: 0 42px 0 14px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.select-wrap::after {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #6f766f;
+  border-bottom: 2px solid #6f766f;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+  content: "";
+}
+
+.disclaimer {
+  margin: 14px 8px 0;
+  color: #878d87;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+

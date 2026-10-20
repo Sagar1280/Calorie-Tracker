@@ -1,0 +1,252 @@
+.bmi-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(27, 33, 28, 0.07);
+  border-radius: 28px;
+  background: linear-gradient(
+    150deg,
+    var(--tone-soft) 0%,
+    #fffdf9 58%,
+    #fffdf9 100%
+  );
+  box-shadow:
+    0 18px 40px -24px rgba(27, 33, 28, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.bmi-card::after {
+  position: absolute;
+  top: -90px;
+  right: -70px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--tone);
+  opacity: 0.09;
+  filter: blur(6px);
+  pointer-events: none;
+  content: "";
+}
+
+.bmi-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bmi-number-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.bmi-number {
+  color: var(--tone-deep);
+  font-size: clamp(50px, 16vw, 64px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+
+.bmi-unit {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(27, 33, 28, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--tone-deep);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 18%, transparent);
+}
+
+.status-chip.is-live .status-dot {
+  animation: pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 18%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--tone) 12%, transparent);
+  }
+}
+
+.bmi-headline {
+  margin: 18px 0 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.scale {
+  position: relative;
+  margin-top: 12px;
+  padding: 3px 0;
+}
+
+.scale-bar {
+  display: flex;
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: #ebe8e0;
+}
+
+.scale-bar span {
+  height: 100%;
+}
+
+.seg-under {
+  width: 17.31%;
+  background: #eda33e;
+}
+
+.seg-healthy {
+  width: 25%;
+  background: #2aa86b;
+}
+
+.seg-over {
+  width: 19.23%;
+  background: #ea7f36;
+}
+
+.seg-obese {
+  width: 38.46%;
+  background: #dc4c40;
+}
+
+.scale-empty .scale-bar {
+  opacity: 0.45;
+  filter: saturate(0.7);
+}
+
+.scale-marker {
+  position: absolute;
+  top: -3px;
+  width: 16px;
+  height: 16px;
+  border: 4px solid var(--text);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(27, 33, 28, 0.28);
+  transform: translateX(-50%);
+  transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 7px 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #7a807a;
+}
+
+.zone-active {
+  border-color: rgba(27, 33, 28, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--text);
+}
+
+.zone-dot {
+  width: 6px;
+  height: 6px;
+  margin-bottom: 2px;
+  border-radius: 50%;
+}
+
+.zone-dot-underweight {
+  background: #eda33e;
+}
+
+.zone-dot-healthy {
+  background: #2aa86b;
+}
+
+.zone-dot-overweight {
+  background: #ea7f36;
+}
+
+.zone-dot-obese {
+  background: #dc4c40;
+}
+
+.zone-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.zone-range {
+  color: #8a908a;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bmi-detail {
+  margin: 15px 0 0;
+  color: #4e554e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bmi-detail.muted {
+  color: var(--muted);
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(27, 33, 28, 0.09);
+  color: #757c75;
+  font-size: 11px;
+}
+
+.range-row strong {
+  color: var(--tone-deep);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
