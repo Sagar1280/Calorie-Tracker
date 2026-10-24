@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ApiError,
   deleteCalorieEntry,
@@ -69,27 +69,40 @@ export default function IntakeView({
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  function handleEntryAdded(created: CalorieEntry) {
-    setNotice("Entry added");
-    setLog((current) =>
-      current
-        ? {
-            ...current,
-            entries: [...current.entries, created],
-            consumed: current.consumed + (created.calories ?? 0),
-            remaining:
-              current.goal - (current.consumed + (created.calories ?? 0)),
-            protein_consumed_g:
-              Math.round(
-                (current.protein_consumed_g + (created.protein_g ?? 0)) * 10,
-              ) / 10,
-            fat_consumed_g:
-              Math.round(
-                (current.fat_consumed_g + (created.fat_g ?? 0)) * 10,
-              ) / 10,
-          }
-        : current,
+  const refreshDay = useCallback(() => {
+    setReloadKey((value) => value + 1);
+  }, []);
+
+  function handleEntriesAdded(created: CalorieEntry[]) {
+    if (created.length === 0) return;
+    setNotice(
+      created.length === 1 ? "Entry added" : `${created.length} entries added`,
     );
+    setLog((current) => {
+      if (!current) return current;
+      const addedCalories = created.reduce(
+        (sum, entry) => sum + (entry.calories ?? 0),
+        0,
+      );
+      const addedProtein = created.reduce(
+        (sum, entry) => sum + (entry.protein_g ?? 0),
+        0,
+      );
+      const addedFat = created.reduce(
+        (sum, entry) => sum + (entry.fat_g ?? 0),
+        0,
+      );
+      return {
+        ...current,
+        entries: [...current.entries, ...created],
+        consumed: current.consumed + addedCalories,
+        remaining: current.goal - (current.consumed + addedCalories),
+        protein_consumed_g:
+          Math.round((current.protein_consumed_g + addedProtein) * 10) / 10,
+        fat_consumed_g:
+          Math.round((current.fat_consumed_g + addedFat) * 10) / 10,
+      };
+    });
   }
 
   async function handleDelete(entryId: number) {
@@ -241,7 +254,8 @@ export default function IntakeView({
           {!log?.done && (
             <FoodPicker
               date={date}
-              onAdded={handleEntryAdded}
+              onAdded={handleEntriesAdded}
+              onRefresh={refreshDay}
               onSessionExpired={onSessionExpired}
             />
           )}

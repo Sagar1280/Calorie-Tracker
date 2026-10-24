@@ -11,5 +11,6 @@
 @import "../features/intake/hero.css";
 @import "../features/calendar/styles.css";
 @import "../features/intake/picker.css";
+@import "../features/intake/photo.css";
 @import "../features/admin/styles.css";
 @import "../features/intake/controls.css";

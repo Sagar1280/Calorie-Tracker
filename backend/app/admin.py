@@ -1,12 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+import secrets
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 
 from .auth import get_current_user
+from .config import ADMIN_CONFIRM_PASSWORD
 from .db import SessionLocal
 from .foods import to_detail_out, to_summary_out
+from .limiter import enforce_rate_limit
 from .models import Brand, Food, FoodAlias, FoodReview, FoodVariant, User
 from .schemas import (
+    AdminBulkActionIn,
+    AdminBulkResultOut,
+    AdminFoodCreateIn,
     AdminFoodReviewListOut,
     AdminFoodReviewOut,
     AdminFoodUpdateIn,
@@ -27,6 +35,58 @@ def require_admin(user: User) -> None:
                 "message": "Admin access is required for this action.",
             },
         )
+
+
+async def require_admin_password(
+    password: str | None = Header(default=None, alias="X-Admin-Password"),
+    user: User = Depends(get_current_user),
+) -> None:
+    if not ADMIN_CONFIRM_PASSWORD:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "admin_password_not_configured",
+                "message": (
+                    "Admin confirmation is not configured. Set "
+                    "ADMIN_CONFIRM_PASSWORD on the server."
+                ),
+            },
+        )
+    if not password or not secrets.compare_digest(
+        password, ADMIN_CONFIRM_PASSWORD
+    ):
+        enforce_rate_limit(
+            "admin-confirm",
+            str(user.id),
+            limit=5,
+            window_seconds=300,
+            message="Too many incorrect admin passwords. Wait five minutes.",
+        )
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "admin_password_invalid",
+                "message": "That confirmation password is incorrect.",
+            },
+        )
+
+
+def review_action(status: str, is_verified: bool) -> str:
+    if status == "rejected":
+        return "rejected"
+    if status == "approved" and is_verified:
+        return "approved"
+    return "updated"
+
+
+async def unique_slug(session, value: str) -> str:
+    base = slugify(value)[:140].rstrip("-") or "food"
+    candidate = base
+    if (
+        await session.execute(select(Food.id).where(Food.slug == candidate))
+    ).scalar_one_or_none() is not None:
+        candidate = f"{base}-{uuid4().hex[:6]}"
+    return candidate
 
 
 async def brand_for_name(session, name: str | None) -> int | None:
@@ -90,11 +150,163 @@ async def list_admin_foods(
     )
 
 
+@router.post("/foods", response_model=FoodDetailOut, status_code=201)
+async def create_admin_food(
+    payload: AdminFoodCreateIn,
+    user: User = Depends(get_current_user),
+    _password: None = Depends(require_admin_password),
+) -> FoodDetailOut:
+    require_admin(user)
+
+    async with SessionLocal() as session:
+        brand_id = await brand_for_name(session, payload.brand_name)
+        food = Food(
+            slug=await unique_slug(
+                session, f"{payload.brand_name or ''} {payload.name}"
+            ),
+            name=payload.name,
+            name_normalized=normalize_text(payload.name)[:160],
+            category=normalize_text(payload.category),
+            subcategory=payload.subcategory,
+            brand_id=brand_id,
+            base_unit=payload.variant.base_unit,
+            description=payload.description,
+            source="curated",
+            status=payload.status,
+            is_verified=payload.is_verified,
+            created_by_user_id=user.id,
+        )
+        session.add(food)
+        await session.flush()
+
+        variant = FoodVariant(
+            food_id=food.id,
+            state="as_sold",
+            label="",
+            kcal=payload.variant.kcal,
+            protein_g=payload.variant.protein_g,
+            carbs_g=payload.variant.carbs_g,
+            fat_g=payload.variant.fat_g,
+            base_amount=payload.variant.base_amount,
+            base_unit=payload.variant.base_unit,
+            is_default=True,
+        )
+        session.add(variant)
+        session.add(
+            FoodReview(
+                food_id=food.id,
+                reviewer_user_id=user.id,
+                action=review_action(payload.status, payload.is_verified),
+                status=payload.status,
+                is_verified=payload.is_verified,
+                note=payload.review_note or "Created from the admin review screen.",
+            )
+        )
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "food_create_conflict",
+                    "message": "That food conflicts with an existing food or brand.",
+                },
+            ) from exc
+
+        food_id = food.id
+        session.expire_all()
+        created = (
+            await session.execute(select(Food).where(Food.id == food_id))
+        ).scalar_one()
+        return to_detail_out(created)
+
+
+@router.post("/foods/bulk", response_model=AdminBulkResultOut)
+async def bulk_admin_foods(
+    payload: AdminBulkActionIn,
+    user: User = Depends(get_current_user),
+    _password: None = Depends(require_admin_password),
+) -> AdminBulkResultOut:
+    require_admin(user)
+
+    async with SessionLocal() as session:
+        foods = (
+            (
+                await session.execute(
+                    select(Food).where(Food.id.in_(payload.ids))
+                )
+            )
+            .scalars()
+            .unique()
+            .all()
+        )
+        if not foods:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "code": "foods_not_found",
+                    "message": "None of those foods are available.",
+                },
+            )
+
+        affected_ids: list[int] = []
+        for food in foods:
+            affected_ids.append(food.id)
+            if payload.action == "delete":
+                await session.delete(food)
+                continue
+
+            if payload.action == "approve":
+                food.status = "approved"
+                food.is_verified = True
+                action = "approved"
+            else:
+                food.status = "rejected"
+                food.is_verified = False
+                action = "rejected"
+
+            session.add(
+                FoodReview(
+                    food_id=food.id,
+                    reviewer_user_id=user.id,
+                    action=action,
+                    status=food.status,
+                    is_verified=food.is_verified,
+                    note=payload.review_note or (
+                        "Approved from the admin review screen."
+                        if action == "approved"
+                        else "Rejected from the admin review screen."
+                    ),
+                )
+            )
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "bulk_action_conflict",
+                    "message": "That bulk action conflicts with existing data.",
+                },
+            ) from exc
+
+    return AdminBulkResultOut(
+        action=payload.action,
+        food_ids=affected_ids,
+        affected=len(affected_ids),
+    )
+
+
 @router.put("/foods/{food_id}", response_model=FoodDetailOut)
 async def update_admin_food(
     food_id: int,
     payload: AdminFoodUpdateIn,
     user: User = Depends(get_current_user),
+    _password: None = Depends(require_admin_password),
 ) -> FoodDetailOut:
     require_admin(user)
 
@@ -141,17 +353,11 @@ async def update_admin_food(
         variant.base_amount = payload.variant.base_amount
         variant.base_unit = payload.variant.base_unit
 
-        if payload.status == "rejected":
-            action = "rejected"
-        elif payload.status == "approved" and payload.is_verified:
-            action = "approved"
-        else:
-            action = "updated"
         session.add(
             FoodReview(
                 food_id=food.id,
                 reviewer_user_id=user.id,
-                action=action,
+                action=review_action(payload.status, payload.is_verified),
                 status=payload.status,
                 is_verified=payload.is_verified,
                 note=payload.review_note,
@@ -175,6 +381,43 @@ async def update_admin_food(
             await session.execute(select(Food).where(Food.id == food_id))
         ).scalar_one()
         return to_detail_out(updated)
+
+
+@router.delete("/foods/{food_id}", status_code=204)
+async def delete_admin_food(
+    food_id: int,
+    user: User = Depends(get_current_user),
+    _password: None = Depends(require_admin_password),
+) -> Response:
+    require_admin(user)
+
+    async with SessionLocal() as session:
+        food = (
+            await session.execute(select(Food).where(Food.id == food_id))
+        ).scalar_one_or_none()
+        if food is None:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "code": "food_not_found",
+                    "message": "That food is not available.",
+                },
+            )
+
+        await session.delete(food)
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "food_delete_conflict",
+                    "message": "That food is still referenced and cannot be deleted.",
+                },
+            ) from exc
+
+    return Response(status_code=204)
 
 
 @router.get("/foods/{food_id}/reviews", response_model=AdminFoodReviewListOut)

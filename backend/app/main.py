@@ -7,21 +7,30 @@ from fastapi.staticfiles import StaticFiles
 
 from .admin import router as admin_router
 from .auth import COOKIE_SECURE
-from .config import CORS_ORIGINS, FRONTEND_DIST, SERVE_FRONTEND
+from .config import (
+    CORS_ORIGINS,
+    FRONTEND_DIST,
+    SEED_FOODS_IF_EMPTY,
+    SERVE_FRONTEND,
+)
 from .db import init_db
 from .foods import router as foods_router
-from .routers import auth, calories, health, profile, tags
-from .seed import seed_default_tags
+from .routers import auth, calories, health, photo_meals, profile, tags
+from .seed import seed_default_tags, seed_foods_if_empty
+from .services.photo_meals import recover_interrupted_photo_jobs
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     await init_db()
     await seed_default_tags()
+    if SEED_FOODS_IF_EMPTY:
+        await seed_foods_if_empty()
+    await recover_interrupted_photo_jobs()
     yield
 
 
-app = FastAPI(title="Calorie Tracker API", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="Calorie Tracker API", version="0.4.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +62,7 @@ app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(calories.router)
 app.include_router(tags.router)
+app.include_router(photo_meals.router)
 app.include_router(foods_router)
 app.include_router(admin_router)
 

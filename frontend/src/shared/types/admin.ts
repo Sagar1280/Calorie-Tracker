@@ -21,6 +21,16 @@ export interface AdminFoodUpdateInput {
   variant: AdminVariantUpdateInput;
 }
 
+export type AdminFoodCreateInput = AdminFoodUpdateInput;
+
+export type AdminBulkAction = "approve" | "reject" | "delete";
+
+export interface AdminBulkResult {
+  action: AdminBulkAction;
+  food_ids: number[];
+  affected: number;
+}
+
 export type AdminReviewAction = "updated" | "approved" | "rejected";
 
 export interface AdminFoodReview {

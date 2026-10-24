@@ -12,7 +12,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app import models  # noqa: E402,F401
-from app.db import SYNC_DATABASE_URL, Base  # noqa: E402
+from app.db import IS_SQLITE, SYNC_DATABASE_URL, Base  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -51,7 +51,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
-        render_as_batch=True,
+        render_as_batch=IS_SQLITE,
     )
 
     with context.begin_transaction():
@@ -76,7 +76,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             compare_type=True,
-            render_as_batch=True,
+            render_as_batch=IS_SQLITE,
         )
 
         with context.begin_transaction():

@@ -7,8 +7,10 @@ backend/data/*.db-shm
 backend/data/*.db-wal
 backend/data/backups/
 backend/data/qa_report.csv
+backend/data/uploads/
 frontend/node_modules/
 frontend/dist/
 logs/
+backups/
 .env
 *.log

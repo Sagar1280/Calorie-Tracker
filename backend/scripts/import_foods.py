@@ -721,6 +721,21 @@ async def apply_import(
     return counts
 
 
+async def import_seed_data(seed_dir: Path) -> dict[str, int]:
+    foods = load_foods(read_rows(seed_dir / "foods.csv"))
+    variants = load_variants(read_rows(seed_dir / "variants.csv"), foods)
+    aliases = load_aliases(
+        read_rows(seed_dir / "aliases.csv", optional=True), foods
+    )
+    servings = load_servings(
+        read_rows(seed_dir / "servings.csv", optional=True), foods, variants
+    )
+    barcodes = load_barcodes(
+        read_rows(seed_dir / "barcodes.csv", optional=True), foods, variants
+    )
+    return await apply_import(foods, variants, aliases, servings, barcodes)
+
+
 async def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

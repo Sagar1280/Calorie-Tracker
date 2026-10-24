@@ -7,23 +7,19 @@ Examples:
 
 import argparse
 import getpass
-import sqlite3
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
+
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.auth import hash_password  # noqa: E402
-from app.db import DATABASE_PATH, run_migrations  # noqa: E402
-
-
-def connect(db_path: Path) -> sqlite3.Connection:
-    connection = sqlite3.connect(db_path)
-    connection.execute("PRAGMA foreign_keys=ON")
-    return connection
+from app.db import SYNC_DATABASE_URL, run_migrations  # noqa: E402
+from app.models import User  # noqa: E402
 
 
 def main() -> int:
@@ -38,51 +34,47 @@ def main() -> int:
         return 2
 
     run_migrations()
-    connection = connect(DATABASE_PATH)
+    engine = create_engine(SYNC_DATABASE_URL)
     try:
-        existing = connection.execute(
-            "select id from users where username=?", (username,)
-        ).fetchone()
-        if args.action == "promote":
-            if existing is None:
-                print(f"User '{username}' was not found.", file=sys.stderr)
+        with Session(engine) as session:
+            existing = session.execute(
+                select(User).where(User.username == username)
+            ).scalar_one_or_none()
+
+            if args.action == "promote":
+                if existing is None:
+                    print(f"User '{username}' was not found.", file=sys.stderr)
+                    return 1
+                existing.role = "admin"
+                session.commit()
+                print(f"Promoted '{username}' to admin.")
+                return 0
+
+            if existing is not None:
+                print(f"User '{username}' already exists.", file=sys.stderr)
                 return 1
-            connection.execute(
-                "update users set role='admin' where username=?", (username,)
+
+            password = getpass.getpass("Password: ")
+            confirmation = getpass.getpass("Confirm password: ")
+            if password != confirmation:
+                print("Passwords do not match.", file=sys.stderr)
+                return 1
+            if len(password) < 8 or len(password) > 128:
+                print("Password must be 8 to 128 characters.", file=sys.stderr)
+                return 1
+
+            session.add(
+                User(
+                    username=username,
+                    password_hash=hash_password(password),
+                    role="admin",
+                )
             )
-            connection.commit()
-            print(f"Promoted '{username}' to admin.")
+            session.commit()
+            print(f"Created admin user '{username}'.")
             return 0
-
-        if existing is not None:
-            print(f"User '{username}' already exists.", file=sys.stderr)
-            return 1
-
-        password = getpass.getpass("Password: ")
-        confirmation = getpass.getpass("Confirm password: ")
-        if password != confirmation:
-            print("Passwords do not match.", file=sys.stderr)
-            return 1
-        if len(password) < 8 or len(password) > 128:
-            print("Password must be 8 to 128 characters.", file=sys.stderr)
-            return 1
-
-        connection.execute(
-            """
-            insert into users (username, password_hash, role, created_at)
-            values (?, ?, 'admin', ?)
-            """,
-            (
-                username,
-                hash_password(password),
-                datetime.now(timezone.utc).isoformat(),
-            ),
-        )
-        connection.commit()
-        print(f"Created admin user '{username}'.")
-        return 0
     finally:
-        connection.close()
+        engine.dispose()
 
 
 if __name__ == "__main__":

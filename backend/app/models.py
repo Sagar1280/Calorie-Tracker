@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -503,6 +504,44 @@ class CalorieEntry(Base):
     fat_g_snapshot: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now
+    )
+
+
+class PhotoMealJob(Base):
+    __tablename__ = "photo_meal_jobs"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'processing', 'completed', 'failed')",
+            name="ck_photo_meal_jobs_status",
+        ),
+        CheckConstraint(
+            "meal IN ('breakfast', 'lunch', 'dinner', 'snack')",
+            name="ck_photo_meal_jobs_meal",
+        ),
+        Index("ix_photo_meal_jobs_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    entry_date: Mapped[date] = mapped_column(Date, nullable=False)
+    meal: Mapped[str] = mapped_column(String(16), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="pending", server_default="pending"
+    )
+    image_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    items: Mapped[list[dict[str, object]] | None] = mapped_column(JSON, nullable=True)
+    entry_ids: Mapped[list[int] | None] = mapped_column(JSON, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
 

@@ -19,6 +19,7 @@ from .openfoodfacts import OffProduct, OpenFoodFactsError, lookup_off_product
 from .schemas import (
     BarcodeLookupIn,
     BarcodeOut,
+    BarcodeScanOut,
     BrandOut,
     FoodDetailOut,
     FoodListOut,
@@ -144,7 +145,9 @@ def _barcode_not_found() -> HTTPException:
     )
 
 
-async def _import_off_product(product: OffProduct, user: User) -> FoodDetailOut:
+async def _import_off_product(
+    product: OffProduct, user: User
+) -> FoodDetailOut:
     async with SessionLocal() as session:
         existing = await _find_barcode_food(session, product.barcode)
         if existing is not None:
@@ -182,11 +185,12 @@ async def _import_off_product(product: OffProduct, user: User) -> FoodDetailOut:
             source="off",
             source_ref=f"https://world.openfoodfacts.org/product/{product.barcode}",
             description=(
-                "Imported from Open Food Facts. Nutrition is crowd-sourced "
-                "and has not been verified."
+                "Imported from Open Food Facts and queued for admin review. "
+                "Nutrition is crowd-sourced and has not been verified."
             ),
-            status="approved",
+            status="pending",
             is_verified=False,
+            created_by_user_id=user.id,
         )
         session.add(food)
         await session.flush()
@@ -248,6 +252,80 @@ async def _import_off_product(product: OffProduct, user: User) -> FoodDetailOut:
             await session.execute(select(Food).where(Food.id == food_id))
         ).scalar_one()
         return to_detail_out(imported)
+
+
+async def _queue_barcode_miss(barcode: str, user: User) -> FoodDetailOut:
+    async with SessionLocal() as session:
+        existing = await _find_barcode_food(session, barcode)
+        if existing is not None:
+            if not can_view(existing, user):
+                raise _barcode_not_found()
+            return to_detail_out(existing)
+
+        name = f"Barcode {barcode}"
+        food = Food(
+            slug=f"barcode-scan-{barcode}",
+            name=name,
+            name_normalized=normalize_text(name)[:160],
+            category="packaged",
+            base_unit="g",
+            source="user",
+            source_ref=f"barcode-scan:{barcode}",
+            description=(
+                "Scanned barcode with no Open Food Facts match. Add the "
+                "product name, brand, and nutrition before approving."
+            ),
+            status="pending",
+            is_verified=False,
+            created_by_user_id=user.id,
+        )
+        session.add(food)
+        await session.flush()
+
+        variant = FoodVariant(
+            food_id=food.id,
+            state="as_sold",
+            label="",
+            kcal=0,
+            protein_g=0,
+            carbs_g=0,
+            fat_g=0,
+            base_amount=100,
+            base_unit="g",
+            is_default=True,
+        )
+        session.add(variant)
+        await session.flush()
+
+        session.add(
+            FoodBarcode(
+                food_id=food.id,
+                variant_id=variant.id,
+                barcode=barcode,
+                source="user",
+            )
+        )
+        food_id = food.id
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            existing = await _find_barcode_food(session, barcode)
+            if existing is not None and can_view(existing, user):
+                return to_detail_out(existing)
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "barcode_conflict",
+                    "message": "That barcode is already linked to another food.",
+                },
+            ) from exc
+
+        queued = (
+            await session.execute(select(Food).where(Food.id == food_id))
+        ).scalar_one()
+        return to_detail_out(queued)
 
 
 def match_score(food: Food, query: str) -> int:
@@ -335,18 +413,26 @@ async def search_foods(
     )
 
 
-@router.post("/barcode/resolve", response_model=FoodDetailOut)
-async def resolve_barcode(
+@router.post("/barcode/scan", response_model=BarcodeScanOut)
+async def scan_barcode(
     payload: BarcodeLookupIn,
     user: User = Depends(get_current_user),
-) -> FoodDetailOut:
+) -> BarcodeScanOut:
     async with SessionLocal() as session:
         existing = await _find_barcode_food(session, payload.barcode)
 
     if existing is not None:
         if not can_view(existing, user):
             raise _barcode_not_found()
-        return to_detail_out(existing)
+        return BarcodeScanOut(
+            barcode=payload.barcode,
+            status=(
+                "database"
+                if existing.status == "approved"
+                else "review"
+            ),
+            food=to_detail_out(existing),
+        )
 
     enforce_rate_limit("barcode", user.id, limit=12, window_seconds=60)
 
@@ -365,9 +451,17 @@ async def resolve_barcode(
         ) from exc
 
     if product is None:
-        raise _barcode_not_found()
+        return BarcodeScanOut(
+            barcode=payload.barcode,
+            status="queued",
+            food=await _queue_barcode_miss(payload.barcode, user),
+        )
 
-    return await _import_off_product(product, user)
+    return BarcodeScanOut(
+        barcode=payload.barcode,
+        status="review",
+        food=await _import_off_product(product, user),
+    )
 
 
 @router.get("/barcode/{barcode}", response_model=FoodDetailOut)

@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
@@ -232,7 +234,25 @@ def test_barcode_lookup_missing(client):
     assert response.json()["detail"]["code"] == "barcode_not_found"
 
 
-def test_barcode_resolve_prefers_local(client, monkeypatch):
+def test_barcode_scan_rejects_invalid_barcode(client):
+    test_client, _ = client
+    response = test_client.post(
+        "/api/foods/barcode/scan",
+        json={"barcode": "1234"},
+    )
+    assert response.status_code == 422
+
+
+def test_barcode_resolve_endpoint_removed(client):
+    test_client, _ = client
+    response = test_client.post(
+        "/api/foods/barcode/resolve",
+        json={"barcode": "8901063012345"},
+    )
+    assert response.status_code == 405
+
+
+def test_barcode_scan_prefers_local_database(client, monkeypatch):
     test_client, _ = client
 
     async def unexpected_lookup(barcode):
@@ -240,60 +260,56 @@ def test_barcode_resolve_prefers_local(client, monkeypatch):
 
     monkeypatch.setattr("app.foods.lookup_off_product", unexpected_lookup)
     response = test_client.post(
-        "/api/foods/barcode/resolve",
+        "/api/foods/barcode/scan",
         json={"barcode": "8901063012345"},
     )
     assert response.status_code == 200
-    assert response.json()["slug"] == "britannia-good-day-cashew"
+    body = response.json()
+    assert body["status"] == "database"
+    assert body["food"]["slug"] == "britannia-good-day-cashew"
 
 
-def test_barcode_resolve_imports_openfoodfacts(client, monkeypatch):
+def test_barcode_scan_queues_openfoodfacts_import_for_review(
+    client, monkeypatch
+):
     test_client, _ = client
-    calls = []
 
     async def fake_lookup(barcode):
-        calls.append(barcode)
         return OffProduct(
             barcode=barcode,
-            name="Acme Chocolate Milk",
+            name="Acme Oat Bites",
             brand="Acme",
-            kcal=250,
-            protein_g=6.5,
-            carbs_g=40,
-            fat_g=7,
-            pack_amount=200,
-            pack_unit="ml",
+            kcal=410,
+            protein_g=8,
+            carbs_g=61,
+            fat_g=14,
+            pack_amount=120,
+            pack_unit="g",
         )
 
     monkeypatch.setattr("app.foods.lookup_off_product", fake_lookup)
     response = test_client.post(
-        "/api/foods/barcode/resolve",
-        json={"barcode": "0123456789012"},
+        "/api/foods/barcode/scan",
+        json={"barcode": "5555555555555"},
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["source"] == "off"
-    assert body["is_verified"] is False
-    assert body["name"] == "Acme Chocolate Milk"
-    assert body["brand"]["name"] == "Acme"
-    assert body["base_unit"] == "ml"
-    assert body["default_variant"]["kcal"] == 250
-    assert body["default_variant"]["base_unit"] == "ml"
-    assert body["default_variant"]["servings"][0]["label"] == "1 pack"
-    assert body["default_variant"]["servings"][0]["amount"] == 200
-    assert body["barcodes"][0]["barcode"] == "0123456789012"
-    assert body["barcodes"][0]["source"] == "off"
+    assert body["status"] == "review"
+    assert body["food"]["status"] == "pending"
+    assert body["food"]["is_verified"] is False
+    assert body["food"]["source"] == "off"
+    assert body["food"]["barcodes"][0]["barcode"] == "5555555555555"
 
-    second = test_client.post(
-        "/api/foods/barcode/resolve",
-        json={"barcode": "0123456789012"},
+    cached = test_client.post(
+        "/api/foods/barcode/scan",
+        json={"barcode": "5555555555555"},
     )
-    assert second.status_code == 200
-    assert second.json()["id"] == body["id"]
-    assert calls == ["0123456789012"]
+    assert cached.status_code == 200
+    assert cached.json()["status"] == "review"
+    assert cached.json()["food"]["id"] == body["food"]["id"]
 
 
-def test_barcode_resolve_missing_remote(client, monkeypatch):
+def test_barcode_scan_queues_unknown_barcode_for_review(client, monkeypatch):
     test_client, _ = client
 
     async def fake_lookup(barcode):
@@ -301,20 +317,16 @@ def test_barcode_resolve_missing_remote(client, monkeypatch):
 
     monkeypatch.setattr("app.foods.lookup_off_product", fake_lookup)
     response = test_client.post(
-        "/api/foods/barcode/resolve",
-        json={"barcode": "0987654321098"},
+        "/api/foods/barcode/scan",
+        json={"barcode": "6666666666666"},
     )
-    assert response.status_code == 404
-    assert response.json()["detail"]["code"] == "barcode_not_found"
-
-
-def test_barcode_resolve_rejects_invalid_barcode(client):
-    test_client, _ = client
-    response = test_client.post(
-        "/api/foods/barcode/resolve",
-        json={"barcode": "1234"},
-    )
-    assert response.status_code == 422
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "queued"
+    assert body["food"]["name"] == "Barcode 6666666666666"
+    assert body["food"]["status"] == "pending"
+    assert body["food"]["source"] == "user"
+    assert body["food"]["barcodes"][0]["barcode"] == "6666666666666"
 
 
 def test_food_detail_missing(client):
@@ -517,6 +529,9 @@ def test_admin_can_review_off_food(client):
 
         updated = test_client.put(
             f"/api/admin/foods/{ids['off_food_id']}",
+            headers={
+                "X-Admin-Password": os.environ["ADMIN_CONFIRM_PASSWORD"]
+            },
             json={
                 "name": "Acme Review Bar Updated",
                 "category": "packaged",
@@ -592,6 +607,69 @@ def test_admin_can_review_off_food(client):
         app.dependency_overrides[get_current_user] = lambda: regular
 
 
+def test_admin_pending_filter_excludes_approved_unverified(client):
+    test_client, ids = client
+    engine = create_engine(SYNC_DATABASE_URL)
+    with Session(engine) as session:
+        pending = Food(
+            slug="pending-review-dal",
+            name="Pending Review Dal",
+            name_normalized="pending review dal",
+            category="dal",
+            base_unit="g",
+            source="user",
+            status="pending",
+            is_verified=False,
+            created_by_user_id=ids["user_id"],
+        )
+        session.add(pending)
+        session.flush()
+        session.add(
+            FoodVariant(
+                food_id=pending.id,
+                state="cooked",
+                label="",
+                kcal=90,
+                protein_g=5,
+                carbs_g=10,
+                fat_g=3,
+                base_amount=100,
+                base_unit="g",
+                is_default=True,
+            )
+        )
+        session.commit()
+        pending_id = pending.id
+    engine.dispose()
+
+    admin = User(
+        id=ids["user_id"],
+        username="pending-admin",
+        password_hash="x",
+        role="admin",
+    )
+    regular = User(
+        id=ids["user_id"],
+        username="food-tester",
+        password_hash="x",
+        role="user",
+    )
+
+    app.dependency_overrides[get_current_user] = lambda: admin
+    try:
+        response = test_client.get(
+            "/api/admin/foods", params={"status": "pending"}
+        )
+        assert response.status_code == 200
+        items = response.json()["items"]
+        item_ids = {item["id"] for item in items}
+        assert pending_id in item_ids
+        assert ids["off_food_id"] not in item_ids
+        assert all(item["status"] == "pending" for item in items)
+    finally:
+        app.dependency_overrides[get_current_user] = lambda: regular
+
+
 def test_barcode_rate_limit(client, monkeypatch):
     test_client, _ = client
     reset_rate_limits()
@@ -602,14 +680,15 @@ def test_barcode_rate_limit(client, monkeypatch):
     monkeypatch.setattr("app.foods.lookup_off_product", fake_lookup)
     for index in range(12):
         response = test_client.post(
-            "/api/foods/barcode/resolve",
-            json={"barcode": f"099999999{index:04d}"},
+            "/api/foods/barcode/scan",
+            json={"barcode": f"088888888{index:04d}"},
         )
-        assert response.status_code == 404
+        assert response.status_code == 200
+        assert response.json()["status"] == "queued"
 
     limited = test_client.post(
-        "/api/foods/barcode/resolve",
-        json={"barcode": "0999999999999"},
+        "/api/foods/barcode/scan",
+        json={"barcode": "0888888889999"},
     )
     assert limited.status_code == 429
     assert limited.json()["detail"]["code"] == "rate_limited"

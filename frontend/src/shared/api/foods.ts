@@ -1,4 +1,4 @@
-import type { FoodDetail, FoodList } from "../types";
+import type { BarcodeScanResult, FoodDetail, FoodList } from "../types";
 import { request } from "./client";
 
 export interface FoodSearchParams {
@@ -25,8 +25,8 @@ export function getFood(foodId: number): Promise<FoodDetail> {
   return request<FoodDetail>(`/foods/${foodId}`);
 }
 
-export function resolveBarcode(barcode: string): Promise<FoodDetail> {
-  return request<FoodDetail>("/foods/barcode/resolve", {
+export function scanBarcode(barcode: string): Promise<BarcodeScanResult> {
+  return request<BarcodeScanResult>("/foods/barcode/scan", {
     method: "POST",
     body: JSON.stringify({ barcode }),
   });

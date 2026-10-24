@@ -75,3 +75,9 @@ export interface FoodList {
   limit: number;
   offset: number;
 }
+
+export interface BarcodeScanResult {
+  barcode: string;
+  status: "database" | "review" | "queued";
+  food: FoodDetail;
+}

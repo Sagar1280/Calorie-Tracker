@@ -31,6 +31,8 @@ EXPECTED_TABLES = {
     "recipes",
     "recipe_items",
     "barcode_scans",
+    "food_reviews",
+    "photo_meal_jobs",
     "calorie_entries",
     "day_logs",
 }

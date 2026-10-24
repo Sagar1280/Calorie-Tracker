@@ -10,16 +10,12 @@ from fastapi import Cookie, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .config import COOKIE_SECURE
 from .db import SessionLocal
 from .models import AuthSession, User, utc_now
 
 SESSION_COOKIE = "ct_session"
 SESSION_TTL = timedelta(days=30)
-COOKIE_SECURE = os.getenv("COOKIE_SECURE", "").strip().lower() in {
-    "1",
-    "true",
-    "yes",
-}
 
 _SCRYPT_N = 2**14
 _SCRYPT_R = 8

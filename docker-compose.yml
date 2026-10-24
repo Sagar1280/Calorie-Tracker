@@ -1,0 +1,88 @@
+name: calorie-tracker
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-calorie}
+      POSTGRES_USER: ${POSTGRES_USER:-calorie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    shm_size: 256mb
+    stop_grace_period: 1m
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  app:
+    image: ${APP_IMAGE:-calorie-tracker:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
+      SERVE_FRONTEND: "true"
+      FRONTEND_DIST: /app/frontend/dist
+      CALORIE_UPLOAD_DIR: /app/data/uploads
+      ADMIN_CONFIRM_PASSWORD: ${ADMIN_CONFIRM_PASSWORD:?set ADMIN_CONFIRM_PASSWORD in .env}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      SEED_FOODS_IF_EMPTY: ${SEED_FOODS_IF_EMPTY:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      PHOTO_LLM_BASE_URL: ${PHOTO_LLM_BASE_URL:-https://api.deepseek.com}
+      PHOTO_LLM_MODEL: ${PHOTO_LLM_MODEL:-deepseek-flash}
+      PHOTO_LLM_REASONING_EFFORT: ${PHOTO_LLM_REASONING_EFFORT:-none}
+      PHOTO_LLM_TIMEOUT_SECONDS: ${PHOTO_LLM_TIMEOUT_SECONDS:-60}
+      PHOTO_MAX_IMAGE_BYTES: ${PHOTO_MAX_IMAGE_BYTES:-8388608}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/data/uploads
+    expose:
+      - "8000"
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:

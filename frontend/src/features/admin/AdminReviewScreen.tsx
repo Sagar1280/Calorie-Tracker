@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   ApiError,
+  bulkReviewFoods,
+  createReviewFood,
   getFood,
   listFoodReviews,
   listReviewFoods,
@@ -8,7 +10,9 @@ import {
   updateReviewFood,
 } from "@/shared/api";
 import type {
+  AdminBulkAction,
   AdminFoodReview,
+  AdminFoodUpdateInput,
   FoodDetail,
   FoodStatus,
   FoodSummary,
@@ -17,7 +21,8 @@ import type {
 } from "@/shared/types";
 import { Topbar } from "@/shared/ui";
 
-type ReviewSource = "all" | "off" | "curated";
+type ReviewSource = "all" | "off" | "curated" | "user";
+type ReviewScope = "pending" | "all";
 
 interface AdminReviewScreenProps {
   user: User;
@@ -41,6 +46,30 @@ interface ReviewForm {
   baseAmount: string;
   baseUnit: FoodUnit;
 }
+
+interface ConfirmRequest {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  danger?: boolean;
+  run: (password: string) => Promise<void>;
+}
+
+const EMPTY_FORM: ReviewForm = {
+  name: "",
+  brandName: "",
+  category: "dish",
+  subcategory: "",
+  description: "",
+  status: "pending",
+  isVerified: false,
+  kcal: "",
+  proteinG: "",
+  carbsG: "",
+  fatG: "",
+  baseAmount: "100",
+  baseUnit: "g",
+};
 
 function toForm(detail: FoodDetail): ReviewForm {
   const variant = detail.default_variant ?? detail.variants[0] ?? null;
@@ -66,6 +95,56 @@ function parseNumber(value: string): number {
   return Number.isFinite(number) ? number : Number.NaN;
 }
 
+function validateForm(values: ReviewForm): string | null {
+  const kcal = parseNumber(values.kcal);
+  const proteinG = parseNumber(values.proteinG);
+  const carbsG = parseNumber(values.carbsG);
+  const fatG = parseNumber(values.fatG);
+  const baseAmount = parseNumber(values.baseAmount);
+
+  if (!values.name.trim() || !values.category.trim()) {
+    return "Name and category are required.";
+  }
+  if (!Number.isFinite(kcal) || kcal < 0 || kcal > 10000) {
+    return "Calories must be between 0 and 10,000.";
+  }
+  if (
+    !Number.isFinite(proteinG) ||
+    !Number.isFinite(carbsG) ||
+    !Number.isFinite(fatG) ||
+    proteinG < 0 ||
+    carbsG < 0 ||
+    fatG < 0
+  ) {
+    return "Macros must be zero or greater.";
+  }
+  if (!Number.isFinite(baseAmount) || baseAmount <= 0) {
+    return "Base amount must be greater than zero.";
+  }
+  return null;
+}
+
+function toInput(values: ReviewForm, note: string): AdminFoodUpdateInput {
+  return {
+    name: values.name.trim(),
+    category: values.category.trim(),
+    subcategory: values.subcategory.trim() || null,
+    brand_name: values.brandName.trim() || null,
+    description: values.description.trim() || null,
+    status: values.status,
+    is_verified: values.isVerified,
+    review_note: note.trim() || null,
+    variant: {
+      kcal: Math.round(parseNumber(values.kcal)),
+      protein_g: parseNumber(values.proteinG),
+      carbs_g: parseNumber(values.carbsG),
+      fat_g: parseNumber(values.fatG),
+      base_amount: parseNumber(values.baseAmount),
+      base_unit: values.baseUnit,
+    },
+  };
+}
+
 export default function AdminReviewScreen({
   user,
   nav,
@@ -75,19 +154,27 @@ export default function AdminReviewScreen({
   const [foods, setFoods] = useState<FoodSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [query, setQuery] = useState("");
+  const [scope, setScope] = useState<ReviewScope>("pending");
   const [source, setSource] = useState<ReviewSource>("all");
   const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [detail, setDetail] = useState<FoodDetail | null>(null);
   const [form, setForm] = useState<ReviewForm | null>(null);
+  const [createMode, setCreateMode] = useState(false);
+  const [createForm, setCreateForm] = useState<ReviewForm>(EMPTY_FORM);
   const [detailLoading, setDetailLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [reviewNote, setReviewNote] = useState("");
   const [history, setHistory] = useState<AdminFoodReview[]>([]);
+  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
@@ -100,6 +187,7 @@ export default function AdminReviewScreen({
       listReviewFoods({
         q: query.trim() || undefined,
         source,
+        status: scope === "pending" ? "pending" : undefined,
         limit: 100,
       })
         .then((list) => {
@@ -128,17 +216,23 @@ export default function AdminReviewScreen({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [query, source, reloadKey, onSessionExpired]);
+  }, [query, scope, source, reloadKey, onSessionExpired]);
 
-  async function selectFood(food: FoodSummary) {
-    setSelectedId(food.id);
+  function clearEditor() {
     setDetail(null);
     setForm(null);
     setHistory([]);
     setReviewNote("");
-    setDetailLoading(true);
     setError(null);
     setNotice(null);
+    setCreateMode(false);
+    setCreateForm(EMPTY_FORM);
+  }
+
+  async function selectFood(food: FoodSummary) {
+    clearEditor();
+    setSelectedId(food.id);
+    setDetailLoading(true);
 
     try {
       const [loaded, reviews] = await Promise.all([
@@ -163,99 +257,223 @@ export default function AdminReviewScreen({
     }
   }
 
+  function startCreate() {
+    clearEditor();
+    setSelectedId(null);
+    setCreateMode(true);
+    setCreateForm(EMPTY_FORM);
+    setNotice(null);
+  }
+
   function setField<K extends keyof ReviewForm>(
     key: K,
     value: ReviewForm[K],
   ) {
+    if (createMode) {
+      setCreateForm((current) => ({ ...current, [key]: value }));
+      return;
+    }
     setForm((current) =>
       current ? { ...current, [key]: value } : current,
     );
   }
 
-  async function handleSave(
+  function toggleSelected(foodId: number) {
+    setSelectedIds((current) =>
+      current.includes(foodId)
+        ? current.filter((id) => id !== foodId)
+        : [...current, foodId],
+    );
+  }
+
+  function toggleAll() {
+    if (foods.length > 0 && foods.every((food) => selectedIds.includes(food.id))) {
+      setSelectedIds([]);
+      return;
+    }
+    setSelectedIds(foods.map((food) => food.id));
+  }
+
+  function openConfirm(request: ConfirmRequest) {
+    setConfirm(request);
+    setConfirmPassword("");
+    setConfirmError(null);
+  }
+
+  function closeConfirm() {
+    if (confirmBusy) return;
+    setConfirm(null);
+    setConfirmPassword("");
+    setConfirmError(null);
+  }
+
+  async function runWithPassword(action: () => Promise<void>) {
+    setConfirmBusy(true);
+    setConfirmError(null);
+    setSaving(true);
+    setError(null);
+
+    try {
+      await action();
+      setConfirm(null);
+      setConfirmPassword("");
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 401) {
+        setConfirm(null);
+        onSessionExpired();
+        return;
+      }
+      setConfirmError(
+        caught instanceof ApiError
+          ? caught.message
+          : "That admin action could not be completed.",
+      );
+    } finally {
+      setConfirmBusy(false);
+      setSaving(false);
+    }
+  }
+
+  function handleSave(
     event?: FormEvent<HTMLFormElement>,
     overrides?: Partial<ReviewForm>,
   ) {
     event?.preventDefault();
-    if (!detail || !form) return;
+    const current = createMode ? createForm : form;
+    if (!current) return;
+    if (!createMode && !detail) return;
 
-    const values = { ...form, ...overrides };
-    const kcal = parseNumber(values.kcal);
-    const proteinG = parseNumber(values.proteinG);
-    const carbsG = parseNumber(values.carbsG);
-    const fatG = parseNumber(values.fatG);
-    const baseAmount = parseNumber(values.baseAmount);
-
-    if (!values.name.trim() || !values.category.trim()) {
-      setError("Name and category are required.");
-      return;
-    }
-    if (!Number.isFinite(kcal) || kcal < 0 || kcal > 10000) {
-      setError("Calories must be between 0 and 10,000.");
-      return;
-    }
-    if (
-      !Number.isFinite(proteinG) ||
-      !Number.isFinite(carbsG) ||
-      !Number.isFinite(fatG) ||
-      proteinG < 0 ||
-      carbsG < 0 ||
-      fatG < 0
-    ) {
-      setError("Macros must be zero or greater.");
-      return;
-    }
-    if (!Number.isFinite(baseAmount) || baseAmount <= 0) {
-      setError("Base amount must be greater than zero.");
+    const values = { ...current, ...overrides };
+    const validationError = validateForm(values);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    setSaving(true);
     setError(null);
     setNotice(null);
 
-    try {
-      const updated = await updateReviewFood(detail.id, {
-        name: values.name.trim(),
-        category: values.category.trim(),
-        subcategory: values.subcategory.trim() || null,
-        brand_name: values.brandName.trim() || null,
-        description: values.description.trim() || null,
-        status: values.status,
-        is_verified: values.isVerified,
-        review_note: reviewNote.trim() || null,
-        variant: {
-          kcal: Math.round(kcal),
-          protein_g: proteinG,
-          carbs_g: carbsG,
-          fat_g: fatG,
-          base_amount: baseAmount,
-          base_unit: values.baseUnit,
+    if (createMode) {
+      openConfirm({
+        title: "Create this food?",
+        description:
+          "Enter the admin confirmation password to add this food to the database.",
+        confirmLabel: "Create food",
+        run: async (password) => {
+          await runWithPassword(async () => {
+            const created = await createReviewFood(
+              toInput(values, reviewNote),
+              password,
+            );
+            setCreateMode(false);
+            setCreateForm(EMPTY_FORM);
+            setSelectedId(created.id);
+            setDetail(created);
+            setForm(toForm(created));
+            setReviewNote("");
+            setHistory(
+              await listFoodReviews(created.id).catch(() => []),
+            );
+            if (created.status === "approved" && created.is_verified) {
+              setScope("all");
+            }
+            setNotice("Food created. The review list has been refreshed.");
+            setReloadKey((value) => value + 1);
+          });
         },
       });
-      setDetail(updated);
-      setForm(toForm(updated));
-      setReviewNote("");
-      setHistory(await listFoodReviews(updated.id).catch(() => []));
-      setNotice(
-        updated.is_verified && updated.status === "approved"
-          ? "Saved and verified. This item has left the review queue."
-          : "Saved. The review queue has been updated.",
-      );
-      setReloadKey((value) => value + 1);
-    } catch (caught) {
-      if (caught instanceof ApiError && caught.status === 401) {
-        onSessionExpired();
-        return;
-      }
-      setError(
-        caught instanceof ApiError
-          ? caught.message
-          : "Could not save those changes.",
-      );
-    } finally {
-      setSaving(false);
+      return;
     }
+
+    const food = detail;
+    if (!food) return;
+    openConfirm({
+      title: "Save these changes?",
+      description:
+        "Enter the admin confirmation password to update this food in the database.",
+      confirmLabel: "Save changes",
+      run: async (password) => {
+        await runWithPassword(async () => {
+          const updated = await updateReviewFood(
+            food.id,
+            toInput(values, reviewNote),
+            password,
+          );
+          setDetail(updated);
+          setForm(toForm(updated));
+          setReviewNote("");
+          setHistory(await listFoodReviews(updated.id).catch(() => []));
+          setNotice(
+            updated.is_verified && updated.status === "approved"
+              ? "Saved and verified. This item has left the review queue."
+              : "Saved. The review list has been updated.",
+          );
+          setReloadKey((value) => value + 1);
+        });
+      },
+    });
+  }
+
+  function requestBatch(action: AdminBulkAction) {
+    if (selectedIds.length === 0) return;
+    const count = selectedIds.length;
+    const labels: Record<AdminBulkAction, string> = {
+      approve: "Approve selected",
+      reject: "Reject selected",
+      delete: "Delete selected",
+    };
+    const descriptions: Record<AdminBulkAction, string> = {
+      approve:
+        "These foods will be approved and marked verified. Enter the admin confirmation password.",
+      reject:
+        "These foods will be rejected and marked unverified. Enter the admin confirmation password.",
+      delete:
+        "These foods will be permanently deleted. Enter the admin confirmation password.",
+    };
+
+    openConfirm({
+      title: `${labels[action]} (${count})?`,
+      description: descriptions[action],
+      confirmLabel: labels[action],
+      danger: action === "delete",
+      run: async (password) => {
+        await runWithPassword(async () => {
+          const result = await bulkReviewFoods(
+            { ids: selectedIds, action },
+            password,
+          );
+          if (
+            action === "delete" &&
+            selectedId !== null &&
+            selectedIds.includes(selectedId)
+          ) {
+            clearEditor();
+            setSelectedId(null);
+          }
+          setSelectedIds([]);
+          setNotice(
+            `${result.affected} food${result.affected === 1 ? "" : "s"} ${
+              action === "delete"
+                ? "deleted"
+                : action === "approve"
+                  ? "approved"
+                  : "rejected"
+            }.`,
+          );
+          setReloadKey((value) => value + 1);
+        });
+      },
+    });
+  }
+
+  async function handleConfirmSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!confirm) return;
+    if (!confirmPassword) {
+      setConfirmError("Enter the admin confirmation password.");
+      return;
+    }
+    await confirm.run(confirmPassword);
   }
 
   async function handleSignOut() {
@@ -270,7 +488,9 @@ export default function AdminReviewScreen({
     }
   }
 
-  const variant = detail?.default_variant ?? detail?.variants[0] ?? null;
+  const activeForm = createMode ? createForm : form;
+  const allSelected =
+    foods.length > 0 && foods.every((food) => selectedIds.includes(food.id));
 
   return (
     <div className="app">
@@ -298,51 +518,91 @@ export default function AdminReviewScreen({
           <div className="section-head">
             <div>
               <p className="eyebrow">Admin</p>
-              <h1>Food review</h1>
+              <h1>Food database</h1>
               <p>
-                Check Open Food Facts imports and curated drafts, correct
-                their nutrition, and leave an audit note before verifying.
+                Add foods, correct nutrition, approve batches, and keep the
+                shared database growing. Every change requires the admin
+                confirmation password.
               </p>
             </div>
-            <span className="review-count">{total} pending</span>
+            <div className="review-intro-actions">
+              <span className="review-count">
+                {total} {scope === "pending" ? "pending" : "foods"}
+              </span>
+              <button
+                type="button"
+                className="save-button review-add"
+                onClick={startCreate}
+              >
+                Add food
+              </button>
+            </div>
           </div>
 
-          <div className="review-source-tabs" role="group" aria-label="Queue source">
-            {(
-              [
-                ["all", "All drafts"],
-                ["off", "Open Food Facts"],
-                ["curated", "Curated"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={source === value ? "active" : ""}
-                aria-pressed={source === value}
-                onClick={() => {
-                  setSource(value);
-                  setSelectedId(null);
-                  setDetail(null);
-                  setForm(null);
-                  setHistory([]);
-                  setNotice(null);
-                  setError(null);
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="review-filter-row">
+            <div
+              className="review-scope-tabs"
+              role="group"
+              aria-label="Food scope"
+            >
+              {(
+                [
+                  ["pending", "Needs review"],
+                  ["all", "All foods"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={scope === value ? "active" : ""}
+                  aria-pressed={scope === value}
+                  onClick={() => {
+                    setScope(value);
+                    setSelectedIds([]);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div
+              className="review-source-tabs"
+              role="group"
+              aria-label="Food source"
+            >
+              {(
+                [
+                  ["all", "All sources"],
+                  ["off", "Open Food Facts"],
+                  ["curated", "Curated"],
+                  ["user", "Photo drafts"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={source === value ? "active" : ""}
+                  aria-pressed={source === value}
+                  onClick={() => {
+                    setSource(value);
+                    setSelectedIds([]);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <label className="field">
-            <span className="field-label">Search review queue</span>
+            <span className="field-label">Search foods</span>
             <input
               className="text-input"
               type="search"
               name="review-search"
               autoComplete="off"
-              placeholder="Search foods by name or alias"
+              placeholder="Search by name or alias"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -357,59 +617,113 @@ export default function AdminReviewScreen({
         </section>
 
         <div className="review-layout">
-          <section className="card review-list-card" aria-label="Review queue">
+          <section className="card review-list-card" aria-label="Food list">
             {loading ? (
-              <p className="search-note">Loading review queue...</p>
+              <p className="search-note">Loading foods...</p>
             ) : listError ? (
               <p className="search-note error">{listError}</p>
             ) : foods.length === 0 ? (
               <div className="review-empty">
-                <strong>No unverified foods in this view.</strong>
-                <span>Imported and curated drafts will appear here.</span>
+                <strong>No foods in this view.</strong>
+                <span>Change the filters or add a new food.</span>
               </div>
             ) : (
-              <div className="review-list">
-                {foods.map((food) => (
-                  <button
-                    key={food.id}
-                    type="button"
-                    className={
-                      selectedId === food.id
-                        ? "review-item active"
-                        : "review-item"
-                    }
-                    onClick={() => selectFood(food)}
-                  >
-                    <span className="review-item-main">
-                      <strong>{food.name}</strong>
-                      <span>
-                        {[food.brand?.name, food.category]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    </span>
-                    <span className="review-item-side">
-                      <span className="review-pill">Needs review</span>
-                      <span>
-                        {food.default_variant
-                          ? `${food.default_variant.kcal} kcal`
-                          : "No nutrition"}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <>
+                <div className="review-list-head">
+                  <label className="review-select-all">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                    />
+                    <span>Select all</span>
+                  </label>
+                  <span>{selectedIds.length} selected</span>
+                </div>
+
+                {selectedIds.length > 0 && (
+                  <div className="review-batch-bar">
+                    <button
+                      type="button"
+                      className="save-button"
+                      onClick={() => requestBatch("approve")}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="scan-button"
+                      onClick={() => requestBatch("reject")}
+                    >
+                      Reject
+                    </button>
+                    <button
+                      type="button"
+                      className="text-button review-reject"
+                      onClick={() => requestBatch("delete")}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+
+                <div className="review-list">
+                  {foods.map((food) => (
+                    <div
+                      key={food.id}
+                      className={
+                        selectedId === food.id
+                          ? "review-row active"
+                          : "review-row"
+                      }
+                    >
+                      <input
+                        className="review-select"
+                        type="checkbox"
+                        checked={selectedIds.includes(food.id)}
+                        onChange={() => toggleSelected(food.id)}
+                        aria-label={`Select ${food.name}`}
+                      />
+                      <button
+                        type="button"
+                        className="review-item"
+                        onClick={() => selectFood(food)}
+                      >
+                        <span className="review-item-main">
+                          <strong>{food.name}</strong>
+                          <span>
+                            {[food.brand?.name, food.category]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        </span>
+                        <span className="review-item-side">
+                          <span className="review-pill">
+                            {food.is_verified ? "Verified" : "Needs review"}
+                          </span>
+                          <span>
+                            {food.default_variant
+                              ? `${food.default_variant.kcal} kcal`
+                              : "No nutrition"}
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </section>
 
           <section className="card review-editor" aria-live="polite">
-            {detailLoading ? (
+            {detailLoading && !createMode ? (
               <p className="search-note">Loading food details...</p>
-            ) : !detail || !form || !variant ? (
+            ) : !activeForm ? (
               <div className="review-empty">
-                <strong>Select a food to review.</strong>
+                <strong>Select a food or add a new one.</strong>
                 <span>
-                  Check the name, brand, category, and nutrition values.
+                  Edit nutrition, change status, or select several foods for a
+                  batch action.
                 </span>
               </div>
             ) : (
@@ -417,19 +731,29 @@ export default function AdminReviewScreen({
                 <div className="section-head">
                   <div>
                     <p className="eyebrow">
-                      {detail.source === "off"
-                        ? "Imported from Open Food Facts"
-                        : "Curated food draft"}
+                      {createMode
+                        ? "New database entry"
+                        : detail?.source === "off"
+                          ? "Imported from Open Food Facts"
+                          : detail?.source === "user"
+                            ? "Photo estimate draft"
+                            : "Curated food"}
                     </p>
-                    <h2>{detail.name}</h2>
+                    <h2>{createMode ? "Add food" : detail?.name}</h2>
                     <p>
-                      Barcode{" "}
-                      {detail.barcodes[0]?.barcode ?? "not recorded"}
+                      {createMode
+                        ? "Nutrition values are per base amount."
+                        : `Barcode ${
+                            detail?.barcodes[0]?.barcode ?? "not recorded"
+                          }`}
                     </p>
                   </div>
                   <span className="review-pill">
-                    {detail.status}
-                    {detail.is_verified ? " · verified" : ""}
+                    {createMode
+                      ? "new"
+                      : `${detail?.status}${
+                          detail?.is_verified ? " · verified" : ""
+                        }`}
                   </span>
                 </div>
 
@@ -439,7 +763,7 @@ export default function AdminReviewScreen({
                     className="text-input"
                     type="text"
                     maxLength={160}
-                    value={form.name}
+                    value={activeForm.name}
                     onChange={(event) =>
                       setField("name", event.target.value)
                     }
@@ -453,7 +777,7 @@ export default function AdminReviewScreen({
                       className="text-input"
                       type="text"
                       maxLength={80}
-                      value={form.brandName}
+                      value={activeForm.brandName}
                       onChange={(event) =>
                         setField("brandName", event.target.value)
                       }
@@ -466,7 +790,7 @@ export default function AdminReviewScreen({
                       className="text-input"
                       type="text"
                       maxLength={32}
-                      value={form.category}
+                      value={activeForm.category}
                       onChange={(event) =>
                         setField("category", event.target.value)
                       }
@@ -479,7 +803,7 @@ export default function AdminReviewScreen({
                       className="text-input"
                       type="text"
                       maxLength={48}
-                      value={form.subcategory}
+                      value={activeForm.subcategory}
                       onChange={(event) =>
                         setField("subcategory", event.target.value)
                       }
@@ -490,7 +814,7 @@ export default function AdminReviewScreen({
                     <span className="field-label">Status</span>
                     <div className="select-wrap">
                       <select
-                        value={form.status}
+                        value={activeForm.status}
                         onChange={(event) =>
                           setField(
                             "status",
@@ -513,7 +837,7 @@ export default function AdminReviewScreen({
                     className="textarea-input"
                     rows={3}
                     maxLength={2000}
-                    value={form.description}
+                    value={activeForm.description}
                     onChange={(event) =>
                       setField("description", event.target.value)
                     }
@@ -522,14 +846,14 @@ export default function AdminReviewScreen({
 
                 <div className="review-grid review-macros">
                   <label className="field">
-                    <span className="field-label">Calories / 100</span>
+                    <span className="field-label">Calories</span>
                     <div className="input-shell">
                       <input
                         type="number"
                         min={0}
                         max={10000}
                         step={1}
-                        value={form.kcal}
+                        value={activeForm.kcal}
                         onChange={(event) =>
                           setField("kcal", event.target.value)
                         }
@@ -545,7 +869,7 @@ export default function AdminReviewScreen({
                         type="number"
                         min={0}
                         step={0.1}
-                        value={form.proteinG}
+                        value={activeForm.proteinG}
                         onChange={(event) =>
                           setField("proteinG", event.target.value)
                         }
@@ -561,7 +885,7 @@ export default function AdminReviewScreen({
                         type="number"
                         min={0}
                         step={0.1}
-                        value={form.carbsG}
+                        value={activeForm.carbsG}
                         onChange={(event) =>
                           setField("carbsG", event.target.value)
                         }
@@ -577,7 +901,7 @@ export default function AdminReviewScreen({
                         type="number"
                         min={0}
                         step={0.1}
-                        value={form.fatG}
+                        value={activeForm.fatG}
                         onChange={(event) =>
                           setField("fatG", event.target.value)
                         }
@@ -596,12 +920,12 @@ export default function AdminReviewScreen({
                         min={1}
                         max={10000}
                         step={1}
-                        value={form.baseAmount}
+                        value={activeForm.baseAmount}
                         onChange={(event) =>
                           setField("baseAmount", event.target.value)
                         }
                       />
-                      <span className="unit">{form.baseUnit}</span>
+                      <span className="unit">{activeForm.baseUnit}</span>
                     </div>
                   </label>
 
@@ -609,7 +933,7 @@ export default function AdminReviewScreen({
                     <span className="field-label">Base unit</span>
                     <div className="select-wrap">
                       <select
-                        value={form.baseUnit}
+                        value={activeForm.baseUnit}
                         onChange={(event) =>
                           setField(
                             "baseUnit",
@@ -639,7 +963,7 @@ export default function AdminReviewScreen({
                 <label className="review-check">
                   <input
                     type="checkbox"
-                    checked={form.isVerified}
+                    checked={activeForm.isVerified}
                     onChange={(event) =>
                       setField("isVerified", event.target.checked)
                     }
@@ -653,7 +977,11 @@ export default function AdminReviewScreen({
                     className="save-button add-entry-button"
                     disabled={saving}
                   >
-                    {saving ? "Saving..." : "Save changes"}
+                    {saving
+                      ? "Saving..."
+                      : createMode
+                        ? "Create food"
+                        : "Save changes"}
                   </button>
                   <button
                     type="button"
@@ -666,21 +994,25 @@ export default function AdminReviewScreen({
                       })
                     }
                   >
-                    Approve and verify
+                    {createMode
+                      ? "Create, approve and verify"
+                      : "Approve and verify"}
                   </button>
-                  <button
-                    type="button"
-                    className="text-button review-reject"
-                    disabled={saving || form.status === "rejected"}
-                    onClick={() =>
-                      handleSave(undefined, {
-                        status: "rejected",
-                        isVerified: false,
-                      })
-                    }
-                  >
-                    Reject
-                  </button>
+                  {!createMode && (
+                    <button
+                      type="button"
+                      className="text-button review-reject"
+                      disabled={saving || activeForm.status === "rejected"}
+                      onClick={() =>
+                        handleSave(undefined, {
+                          status: "rejected",
+                          isVerified: false,
+                        })
+                      }
+                    >
+                      Reject
+                    </button>
+                  )}
                 </div>
 
                 {error && (
@@ -689,43 +1021,113 @@ export default function AdminReviewScreen({
                   </p>
                 )}
 
-                <div className="review-history">
-                  <div className="review-history-head">
-                    <span className="field-label">Review history</span>
-                    <span>{history.length} note{history.length === 1 ? "" : "s"}</span>
-                  </div>
-                  {history.length === 0 ? (
-                    <p className="search-note">No reviews recorded yet.</p>
-                  ) : (
-                    history.map((item) => (
-                      <div className="review-history-item" key={item.id}>
-                        <div>
-                          <strong>{item.action}</strong>
-                          <span>
-                            {item.reviewer_username
-                              ? `@${item.reviewer_username}`
-                              : "Unknown reviewer"}
-                            {" ? "}
-                            {new Date(item.created_at).toLocaleString("en-GB")}
-                          </span>
+                {!createMode && (
+                  <div className="review-history">
+                    <div className="review-history-head">
+                      <span className="field-label">Review history</span>
+                      <span>
+                        {history.length} note{history.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                    {history.length === 0 ? (
+                      <p className="search-note">No reviews recorded yet.</p>
+                    ) : (
+                      history.map((item) => (
+                        <div className="review-history-item" key={item.id}>
+                          <div>
+                            <strong>{item.action}</strong>
+                            <span>
+                              {item.reviewer_username
+                                ? `@${item.reviewer_username}`
+                                : "Unknown reviewer"}
+                              {" · "}
+                              {new Date(item.created_at).toLocaleString(
+                                "en-GB",
+                              )}
+                            </span>
+                          </div>
+                          <p>
+                            {item.note ||
+                              (item.action === "approved"
+                                ? "Approved and verified."
+                                : item.action === "rejected"
+                                  ? "Rejected."
+                                  : "Saved without a note.")}
+                          </p>
                         </div>
-                        <p>
-                          {item.note ||
-                            (item.action === "approved"
-                              ? "Approved and verified."
-                              : item.action === "rejected"
-                                ? "Rejected."
-                                : "Saved without a note.")}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </form>
             )}
           </section>
         </div>
       </main>
+
+      {confirm && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeConfirm();
+          }}
+        >
+          <form
+            className="confirm-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-confirm-title"
+            onSubmit={handleConfirmSubmit}
+          >
+            <p className="eyebrow">Admin confirmation</p>
+            <h2 id="admin-confirm-title">{confirm.title}</h2>
+            <p>{confirm.description}</p>
+
+            <label className="field">
+              <span className="field-label">Confirmation password</span>
+              <input
+                className="text-input"
+                type="password"
+                autoFocus
+                autoComplete="current-password"
+                value={confirmPassword}
+                onChange={(event) =>
+                  setConfirmPassword(event.target.value)
+                }
+              />
+            </label>
+
+            {confirmError && (
+              <p className="form-error" role="alert">
+                {confirmError}
+              </p>
+            )}
+
+            <div className="confirm-actions">
+              <button
+                type="button"
+                className="text-button"
+                onClick={closeConfirm}
+                disabled={confirmBusy}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={
+                  confirm.danger
+                    ? "save-button danger-button"
+                    : "save-button"
+                }
+                disabled={confirmBusy}
+              >
+                {confirmBusy ? "Working..." : confirm.confirmLabel}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

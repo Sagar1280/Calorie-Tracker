@@ -267,6 +267,14 @@ class FoodDetailOut(FoodSummaryOut):
     barcodes: list[BarcodeOut]
 
 
+class BarcodeScanOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    barcode: str
+    status: Literal["database", "review", "queued"]
+    food: FoodDetailOut
+
+
 class FoodListOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -333,3 +341,59 @@ class AdminFoodUpdateIn(BaseModel):
             return None
         value = " ".join(value.split())
         return value or None
+
+
+class AdminFoodCreateIn(AdminFoodUpdateIn):
+    pass
+
+
+class AdminBulkActionIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ids: list[int] = Field(min_length=1, max_length=100)
+    action: Literal["approve", "reject", "delete"]
+    review_note: str | None = Field(default=None, max_length=1000)
+
+
+class AdminBulkResultOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["approve", "reject", "delete"]
+    food_ids: list[int]
+    affected: int
+
+
+class PhotoMealItemOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    portion_g: float
+    calories: int
+    protein_g: float
+    carbs_g: float = 0
+    fat_g: float
+    confidence: float
+    matched: bool = False
+    food_id: int | None = None
+
+
+class PhotoMealJobOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: int
+    date: date
+    meal: Meal
+    status: Literal["pending", "processing", "completed", "failed"]
+    items: list[PhotoMealItemOut]
+    entry_ids: list[int]
+    error: str | None
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None
+
+
+class PhotoMealConfigOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+    model: str

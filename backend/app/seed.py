@@ -1,7 +1,11 @@
+from pathlib import Path
+
 from sqlalchemy import select
 
 from .db import SessionLocal
-from .models import Tag
+from .models import Food, Tag
+
+SEED_DIR = Path(__file__).resolve().parent.parent / "data" / "seed"
 
 DEFAULT_TAGS: tuple[dict[str, str], ...] = (
     {"key": "iron", "label": "Iron", "type": "micronutrient"},
@@ -28,3 +32,16 @@ async def seed_default_tags() -> None:
             if item["key"] not in existing:
                 session.add(Tag(**item))
         await session.commit()
+
+
+async def seed_foods_if_empty() -> None:
+    async with SessionLocal() as session:
+        existing = (
+            await session.execute(select(Food.id).limit(1))
+        ).scalar_one_or_none()
+    if existing is not None:
+        return
+
+    from scripts.import_foods import import_seed_data
+
+    await import_seed_data(SEED_DIR)
