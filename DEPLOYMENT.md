@@ -222,8 +222,7 @@ Configure these repository secrets:
 | `DEPLOY_HOST` | Server IP or DNS name |
 | `DEPLOY_USER` | SSH user, ideally a dedicated deploy user |
 | `DEPLOY_SSH_KEY` | Private key whose public key is in the server's `authorized_keys` |
-| `GHCR_USERNAME` | GitHub username that can read the package |
-| `GHCR_READ_TOKEN` | PAT with `read:packages` |
+
 
 Configure these repository variables:
 
@@ -233,9 +232,8 @@ Configure these repository variables:
 | `DEPLOY_PATH` | `/opt/calorie-tracker` |
 
 The deploy job updates the checkout, backs up PostgreSQL when the database is
-running, logs in to GHCR, pulls the exact `sha-` image, starts the stack without
-building, and checks `/api/health`. If the package is public, the GHCR login can
-be removed; keep it private otherwise.
+running, pulls the public `sha-` image from GHCR, starts the stack without
+building, and checks `/api/health`.
 
 The first image must exist in GHCR before `DEPLOY_ENABLED=true`, otherwise the
 server cannot pull the `sha-` tag. Push to `main` once with deployment disabled,
@@ -331,6 +329,6 @@ and backups all consume it.
 - Set a unique `ADMIN_CONFIRM_PASSWORD`; it is separate from user passwords.
 - Set `ALLOW_REGISTRATION=false` after creating accounts.
 - Enable `COOKIE_SECURE=true` as soon as HTTPS works.
-- Keep the GHCR package private unless you intend it to be public.
-- Rotate the GHCR read token and deploy key if a laptop or server is lost.
+- The GHCR package is public; do not store secrets in image layers.
+- Rotate the deploy key if a laptop or server is lost.
 - Test a restore, not just backup creation.

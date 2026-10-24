@@ -704,7 +704,7 @@ application-specific threat model. A CI pipeline is not a security assessment.
 ### Stage 4: automated CD
 
 - [ ] Publish the first image to GHCR.
-- [ ] Add SSH and GHCR read secrets plus `DEPLOY_ENABLED` and `DEPLOY_PATH`.
+- [ ] Add SSH secrets plus `DEPLOY_ENABLED` and `DEPLOY_PATH`.
 - [ ] Confirm the deploy workflow backs up, pulls the exact `sha-` image, and
   passes its health check.
 - [ ] Document and test rollback to a previous `sha-` tag.

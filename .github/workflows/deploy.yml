@@ -35,7 +35,6 @@ jobs:
             if docker compose ps --status running --services | grep -qx db; then
               sh ./deploy/backup_postgres.sh
             fi
-            echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             image_repository="$(printf '%s' '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
             export APP_IMAGE="ghcr.io/${image_repository}:sha-${{ github.event.workflow_run.head_sha }}"
             docker compose pull app
