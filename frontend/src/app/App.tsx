@@ -1,22 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { AdminReviewScreen } from "@/features/admin";
 import { AuthScreen } from "@/features/auth";
 import { ProfileScreen } from "@/features/profile";
 import { ApiError, getMe } from "@/shared/api";
-import { todayISO } from "@/shared/lib";
-import type { AppView, User } from "@/shared/types";
+import {
+  isValidISODate,
+  isValidMonthKey,
+  todayISO,
+} from "@/shared/lib";
+import type { User } from "@/shared/types";
 import { Topbar } from "@/shared/ui";
 import { AppNav } from "./AppNav";
 import TrackerScreen from "./TrackerScreen";
 
 export default function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
   const [bootError, setBootError] = useState<string | null>(null);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [bootKey, setBootKey] = useState(0);
-  const [view, setView] = useState<AppView>("intake");
-  const [selectedDate, setSelectedDate] = useState(todayISO());
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const date = new URLSearchParams(location.search).get("date");
+    return isValidISODate(date) ? date : todayISO();
+  });
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const month = new URLSearchParams(location.search).get("month");
+    return isValidMonthKey(month) ? month : selectedDate.slice(0, 7);
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -47,11 +66,25 @@ export default function App() {
     };
   }, [bootKey]);
 
+  useEffect(() => {
+    if (location.pathname !== "/intake" && location.pathname !== "/calendar") {
+      return;
+    }
+    const date = new URLSearchParams(location.search).get("date");
+    setSelectedDate(isValidISODate(date) ? date : todayISO());
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (location.pathname !== "/calendar") return;
+    const month = new URLSearchParams(location.search).get("month");
+    setCalendarMonth(
+      isValidMonthKey(month) ? month : selectedDate.slice(0, 7),
+    );
+  }, [location.pathname, location.search, selectedDate]);
+
   const handleAuthenticated = useCallback((authenticated: User) => {
     setAuthNotice(null);
     setUser(authenticated);
-    setView("intake");
-    setSelectedDate(todayISO());
   }, []);
 
   const handleSessionExpired = useCallback(() => {
@@ -63,6 +96,28 @@ export default function App() {
     setAuthNotice("You've been signed out.");
     setUser(null);
   }, []);
+
+  const handleDateChange = useCallback(
+    (iso: string) => {
+      setSelectedDate(iso);
+      setCalendarMonth(iso.slice(0, 7));
+      const params = new URLSearchParams({ date: iso });
+      navigate({ pathname: "/intake", search: params.toString() });
+    },
+    [navigate],
+  );
+
+  const handleMonthChange = useCallback(
+    (month: string) => {
+      setCalendarMonth(month);
+      const params = new URLSearchParams({
+        month,
+        date: selectedDate,
+      });
+      navigate({ pathname: "/calendar", search: params.toString() });
+    },
+    [navigate, selectedDate],
+  );
 
   if (checking) {
     return (
@@ -116,44 +171,78 @@ export default function App() {
 
   const nav = (
     <AppNav
-      current={view}
-      onChange={setView}
+      selectedDate={selectedDate}
+      calendarMonth={calendarMonth}
       isAdmin={user.role === "admin"}
     />
   );
 
-  if (view === "review" && user.role === "admin") {
-    return (
-      <AdminReviewScreen
-        user={user}
-        nav={nav}
-        onSessionExpired={handleSessionExpired}
-        onSignedOut={handleSignedOut}
-      />
-    );
-  }
-
-  if (view === "profile") {
-    return (
-      <ProfileScreen
-        user={user}
-        nav={nav}
-        onSessionExpired={handleSessionExpired}
-        onSignedOut={handleSignedOut}
-      />
-    );
-  }
+  const intakePath = `/intake?${new URLSearchParams({
+    date: selectedDate,
+  }).toString()}`;
 
   return (
-    <TrackerScreen
-      user={user}
-      view={view === "calendar" ? "calendar" : "intake"}
-      date={selectedDate}
-      nav={nav}
-      onViewChange={setView}
-      onDateChange={setSelectedDate}
-      onSessionExpired={handleSessionExpired}
-      onSignedOut={handleSignedOut}
-    />
+    <Routes>
+      <Route path="/" element={<Navigate to={intakePath} replace />} />
+      <Route
+        path="/intake"
+        element={
+          <TrackerScreen
+            user={user}
+            view="intake"
+            date={selectedDate}
+            month={calendarMonth}
+            nav={nav}
+            onDateChange={handleDateChange}
+            onMonthChange={handleMonthChange}
+            onSessionExpired={handleSessionExpired}
+            onSignedOut={handleSignedOut}
+          />
+        }
+      />
+      <Route
+        path="/calendar"
+        element={
+          <TrackerScreen
+            user={user}
+            view="calendar"
+            date={selectedDate}
+            month={calendarMonth}
+            nav={nav}
+            onDateChange={handleDateChange}
+            onMonthChange={handleMonthChange}
+            onSessionExpired={handleSessionExpired}
+            onSignedOut={handleSignedOut}
+          />
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProfileScreen
+            user={user}
+            nav={nav}
+            onSessionExpired={handleSessionExpired}
+            onSignedOut={handleSignedOut}
+          />
+        }
+      />
+      <Route
+        path="/review"
+        element={
+          user.role === "admin" ? (
+            <AdminReviewScreen
+              user={user}
+              nav={nav}
+              onSessionExpired={handleSessionExpired}
+              onSignedOut={handleSignedOut}
+            />
+          ) : (
+            <Navigate to={intakePath} replace />
+          )
+        }
+      />
+      <Route path="*" element={<Navigate to={intakePath} replace />} />
+    </Routes>
   );
 }

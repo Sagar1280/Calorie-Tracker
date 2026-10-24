@@ -1,5 +1,8 @@
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const MONTH_KEY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
 export function toISODate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -7,8 +10,25 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function toMonthKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
 export function todayISO(): string {
   return toISODate(new Date());
+}
+
+export function isValidISODate(value: string | null | undefined): value is string {
+  if (!value || !ISO_DATE_PATTERN.test(value)) return false;
+  return toISODate(parseISODate(value)) === value;
+}
+
+export function isValidMonthKey(
+  value: string | null | undefined,
+): value is string {
+  return Boolean(value && MONTH_KEY_PATTERN.test(value));
 }
 
 export function parseISODate(iso: string): Date {

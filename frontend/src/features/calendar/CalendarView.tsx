@@ -5,28 +5,28 @@ import {
   formatMonthYear,
   formatShortDate,
   monthCells,
-  parseISODate,
   todayISO,
+  toMonthKey,
   WEEKDAYS,
 } from "@/shared/lib";
 import type { MonthLog } from "@/shared/types";
 
 interface CalendarViewProps {
   selectedDate: string;
+  monthKey: string;
+  onMonthChange: (month: string) => void;
   onOpenDay: (iso: string) => void;
   onSessionExpired: () => void;
 }
 
 export default function CalendarView({
   selectedDate,
+  monthKey,
+  onMonthChange,
   onOpenDay,
   onSessionExpired,
 }: CalendarViewProps) {
-  const initial = parseISODate(selectedDate);
-  const [cursor, setCursor] = useState({
-    year: initial.getFullYear(),
-    month: initial.getMonth() + 1,
-  });
+  const [year, month] = monthKey.split("-").map(Number);
   const [log, setLog] = useState<MonthLog | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -38,9 +38,9 @@ export default function CalendarView({
     setLoading(true);
     setLoadError(null);
 
-    getCalorieMonth(cursor.year, cursor.month)
-      .then((month) => {
-        if (!cancelled) setLog(month);
+    getCalorieMonth(year, month)
+      .then((log) => {
+        if (!cancelled) setLog(log);
       })
       .catch((caught) => {
         if (cancelled) return;
@@ -59,12 +59,9 @@ export default function CalendarView({
     return () => {
       cancelled = true;
     };
-  }, [cursor.year, cursor.month, reloadKey, onSessionExpired]);
+  }, [year, month, reloadKey, onSessionExpired]);
 
-  const cells = useMemo(
-    () => monthCells(cursor.year, cursor.month),
-    [cursor.year, cursor.month],
-  );
+  const cells = useMemo(() => monthCells(year, month), [year, month]);
 
   const byDate = useMemo(() => {
     const map = new Map<
@@ -85,13 +82,11 @@ export default function CalendarView({
   const goal = log?.goal ?? 2000;
 
   function shiftMonth(delta: number) {
-    const next = new Date(cursor.year, cursor.month - 1 + delta, 1, 12);
-    setCursor({ year: next.getFullYear(), month: next.getMonth() + 1 });
+    onMonthChange(toMonthKey(new Date(year, month - 1 + delta, 1, 12)));
   }
 
   function jumpToToday() {
-    const now = new Date();
-    setCursor({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    onMonthChange(todayISO().slice(0, 7));
   }
 
   return (
@@ -108,7 +103,7 @@ export default function CalendarView({
         <div className="calendar-head">
           <div>
             <p className="eyebrow">Month view</p>
-            <h2>{formatMonthYear(cursor.year, cursor.month)}</h2>
+            <h2>{formatMonthYear(year, month)}</h2>
           </div>
           <div className="month-nav">
             <button

@@ -2,16 +2,17 @@ import { useState, type ReactNode } from "react";
 import { CalendarView } from "@/features/calendar";
 import { IntakeView } from "@/features/intake";
 import { logout } from "@/shared/api";
-import type { AppView, User } from "@/shared/types";
+import type { User } from "@/shared/types";
 import { Topbar } from "@/shared/ui";
 
 interface TrackerScreenProps {
   user: User;
   view: "intake" | "calendar";
   date: string;
+  month: string;
   nav: ReactNode;
-  onViewChange: (view: AppView) => void;
   onDateChange: (iso: string) => void;
+  onMonthChange: (month: string) => void;
   onSessionExpired: () => void;
   onSignedOut: () => void;
 }
@@ -20,9 +21,10 @@ export default function TrackerScreen({
   user,
   view,
   date,
+  month,
   nav,
-  onViewChange,
   onDateChange,
+  onMonthChange,
   onSessionExpired,
   onSignedOut,
 }: TrackerScreenProps) {
@@ -43,7 +45,6 @@ export default function TrackerScreen({
 
   function openDay(iso: string) {
     onDateChange(iso);
-    onViewChange("intake");
   }
 
   return (
@@ -94,6 +95,8 @@ export default function TrackerScreen({
         ) : (
           <CalendarView
             selectedDate={date}
+            monthKey={month}
+            onMonthChange={onMonthChange}
             onOpenDay={openDay}
             onSessionExpired={onSessionExpired}
           />

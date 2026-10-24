@@ -1,35 +1,55 @@
-import type { AppView } from "@/shared/types";
+import { Link, useLocation } from "react-router-dom";
 
-const ITEMS: { value: AppView; label: string }[] = [
-  { value: "intake", label: "Intake" },
-  { value: "calendar", label: "Calendar" },
-  { value: "profile", label: "Profile" },
-  { value: "review", label: "Review" },
+type NavPath = "/intake" | "/calendar" | "/profile" | "/review";
+
+const ITEMS: { path: NavPath; label: string; adminOnly?: boolean }[] = [
+  { path: "/intake", label: "Intake" },
+  { path: "/calendar", label: "Calendar" },
+  { path: "/profile", label: "Profile" },
+  { path: "/review", label: "Review", adminOnly: true },
 ];
 
 interface AppNavProps {
-  current: AppView;
-  onChange: (view: AppView) => void;
+  selectedDate: string;
+  calendarMonth: string;
   isAdmin?: boolean;
 }
 
-export function AppNav({ current, onChange, isAdmin = false }: AppNavProps) {
-  const items = ITEMS.filter(
-    (item) => item.value !== "review" || isAdmin,
-  );
+function search(params: Record<string, string>): string {
+  return new URLSearchParams(params).toString();
+}
+
+export function AppNav({
+  selectedDate,
+  calendarMonth,
+  isAdmin = false,
+}: AppNavProps) {
+  const location = useLocation();
+
+  function target(path: NavPath): string {
+    if (path === "/intake") {
+      return `${path}?${search({ date: selectedDate })}`;
+    }
+    if (path === "/calendar") {
+      return `${path}?${search({
+        month: calendarMonth,
+        date: selectedDate,
+      })}`;
+    }
+    return path;
+  }
 
   return (
     <nav className="app-nav" aria-label="Sections">
-      {items.map((item) => (
-        <button
-          key={item.value}
-          type="button"
-          className={current === item.value ? "active" : ""}
-          aria-current={current === item.value ? "page" : undefined}
-          onClick={() => onChange(item.value)}
+      {ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => (
+        <Link
+          key={item.path}
+          to={target(item.path)}
+          className={location.pathname === item.path ? "active" : ""}
+          aria-current={location.pathname === item.path ? "page" : undefined}
         >
           {item.label}
-        </button>
+        </Link>
       ))}
     </nav>
   );
